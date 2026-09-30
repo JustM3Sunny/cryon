@@ -2,7 +2,7 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 const { resolve } = require('path');
 
-const isLinuxVulkanBuild = process.env.GOOSE_DESKTOP_LINUX_VARIANT === 'vulkan';
+const isLinuxVulkanBuild = process.env.CRYON_DESKTOP_LINUX_VARIANT === 'vulkan';
 
 let cfg = {
   asar: true,
@@ -19,8 +19,8 @@ let cfg = {
   // Protocol registration
   protocols: [
     {
-      name: 'GooseProtocol',
-      schemes: ['goose'],
+      name: 'CryonProtocol',
+      schemes: ['cryon'],
     },
   ],
   // macOS Info.plist extensions for drag-and-drop support
@@ -36,9 +36,9 @@ let cfg = {
     ],
     // Usage descriptions for macOS TCC (Transparency, Consent, and Control)
     NSMicrophoneUsageDescription:
-      'Goose needs access to your microphone for voice dictation.',
+      'Cryon needs access to your microphone for voice dictation.',
     NSAppleEventsUsageDescription:
-      'Goose needs access to send Apple Events to control other apps on your behalf.',
+      'Cryon needs access to send Apple Events to control other apps on your behalf.',
   },
 };
 
@@ -66,7 +66,7 @@ module.exports = {
       config: {
         repository: {
           owner: process.env.GITHUB_OWNER || 'aaif-goose',
-          name: process.env.GITHUB_REPO || 'goose',
+          name: process.env.GITHUB_REPO || 'cryon',
         },
         prerelease: false,
         draft: true,
@@ -87,10 +87,10 @@ module.exports = {
     {
       name: '@electron-forge/maker-deb',
       config: {
-        name: 'Goose',
-        bin: 'Goose',
+        name: 'Cryon',
+        bin: 'Cryon',
         maintainer: 'AAIF (Agentic AI Foundation)',
-        homepage: 'https://goose-docs.ai/',
+        homepage: 'https://cryon-docs.ai/',
         categories: ['Development'],
         desktopTemplate: './forge.deb.desktop',
         options: {
@@ -103,10 +103,10 @@ module.exports = {
     {
       name: '@electron-forge/maker-rpm',
       config: {
-        name: 'Goose',
-        bin: 'Goose',
+        name: 'Cryon',
+        bin: 'Cryon',
         maintainer: 'AAIF (Agentic AI Foundation)',
-        homepage: 'https://goose-docs.ai/',
+        homepage: 'https://cryon-docs.ai/',
         categories: ['Development'],
         desktopTemplate: './forge.rpm.desktop',
         options: {
@@ -120,17 +120,17 @@ module.exports = {
       name: '@electron-forge/maker-flatpak',
       config: {
         options: {
-          id: 'io.github.block.Goose', // NOTE: kept for backwards compat with existing installs
+          id: 'io.github.block.Cryon', // NOTE: kept for backwards compat with existing installs
           categories: ['Development'],
-          mimeType: ['x-scheme-handler/goose'],
+          mimeType: ['x-scheme-handler/cryon'],
           icon: {
             scalable: 'src/images/icon.svg',
             '512x512': 'src/images/icon-512.png',
           },
-          homepage: 'https://goose-docs.ai/',
+          homepage: 'https://cryon-docs.ai/',
           runtimeVersion: '25.08',
           baseVersion: '25.08',
-          bin: 'Goose',
+          bin: 'Cryon',
           modules: [
             {
               name: 'libbz2-shim',

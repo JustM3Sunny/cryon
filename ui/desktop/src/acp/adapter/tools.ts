@@ -4,15 +4,15 @@ import type {
   ToolCallUpdate,
 } from '@agentclientprotocol/sdk';
 import type { Message } from '../../types/message';
-import type { ContentBlock as GooseContentBlock } from '../../types/message';
+import type { ContentBlock as CryonContentBlock } from '../../types/message';
 import { findMessageForChunk } from './messages';
 import { toolNotificationChange } from './toolNotifications';
 import {
   type AcpChatStateChange,
   type AdapterState,
   DEFAULT_VISIBLE_MESSAGE_METADATA,
-  type GooseMessageMeta,
-  getGooseMessageMeta,
+  type CryonMessageMeta,
+  getCryonMessageMeta,
   isRecord,
   messagesChange,
   rawInputToArguments,
@@ -24,8 +24,8 @@ import {
 export function applyToolCall(state: AdapterState, update: ToolCall): AcpChatStateChange[] {
   updateToolCallState(state, update);
 
-  const gooseMeta = getGooseMessageMeta(update);
-  const message = getOrCreateAssistantMessageForUpdate(state, gooseMeta);
+  const cryonMeta = getCryonMessageMeta(update);
+  const message = getOrCreateAssistantMessageForUpdate(state, cryonMeta);
 
   if (
     message.content.some(
@@ -72,8 +72,8 @@ export function applyToolCallUpdate(
     return messagesChange(state);
   }
 
-  const gooseMeta = getGooseMessageMeta(update);
-  const message = getOrCreateToolResponseMessageForUpdate(state, gooseMeta);
+  const cryonMeta = getCryonMessageMeta(update);
+  const message = getOrCreateToolResponseMessageForUpdate(state, cryonMeta);
   const identity = toolIdentity(update);
   const metadata = toolResponseMetadata(toolCallState, identity);
 
@@ -114,17 +114,17 @@ function mergeToolCallState(
 
 function getOrCreateAssistantMessageForUpdate(
   state: AdapterState,
-  gooseMeta: GooseMessageMeta
+  cryonMeta: CryonMessageMeta
 ): Message {
-  const existing = findMessageForChunk(state, 'assistant', gooseMeta.messageId, gooseMeta.created);
+  const existing = findMessageForChunk(state, 'assistant', cryonMeta.messageId, cryonMeta.created);
   if (existing) {
     return existing;
   }
 
   const message: Message = {
-    ...(gooseMeta.messageId ? { id: gooseMeta.messageId } : {}),
+    ...(cryonMeta.messageId ? { id: cryonMeta.messageId } : {}),
     role: 'assistant',
-    created: gooseMeta.created ?? Math.floor(Date.now() / 1000),
+    created: cryonMeta.created ?? Math.floor(Date.now() / 1000),
     content: [],
     metadata: { ...DEFAULT_VISIBLE_MESSAGE_METADATA },
   };
@@ -134,11 +134,11 @@ function getOrCreateAssistantMessageForUpdate(
 
 function getOrCreateToolResponseMessageForUpdate(
   state: AdapterState,
-  gooseMeta: GooseMessageMeta
+  cryonMeta: CryonMessageMeta
 ): Message {
-  if (gooseMeta.messageId) {
+  if (cryonMeta.messageId) {
     const existing = state.messages.find(
-      (message) => message.id === gooseMeta.messageId && message.role === 'user'
+      (message) => message.id === cryonMeta.messageId && message.role === 'user'
     );
     if (existing) {
       return existing;
@@ -146,9 +146,9 @@ function getOrCreateToolResponseMessageForUpdate(
   }
 
   const message: Message = {
-    ...(gooseMeta.messageId ? { id: gooseMeta.messageId } : {}),
+    ...(cryonMeta.messageId ? { id: cryonMeta.messageId } : {}),
     role: 'user',
-    created: gooseMeta.created ?? Math.floor(Date.now() / 1000),
+    created: cryonMeta.created ?? Math.floor(Date.now() / 1000),
     content: [],
     metadata: { ...DEFAULT_VISIBLE_MESSAGE_METADATA },
   };
@@ -236,8 +236,8 @@ function toolResultValue(
   return toolResult;
 }
 
-function toolResultContent(update: ToolCallUpdate): GooseContentBlock[] {
-  const content: GooseContentBlock[] = [];
+function toolResultContent(update: ToolCallUpdate): CryonContentBlock[] {
+  const content: CryonContentBlock[] = [];
 
   for (const item of update.content ?? []) {
     if (item.type !== 'content') {
@@ -263,7 +263,7 @@ function toolResultContent(update: ToolCallUpdate): GooseContentBlock[] {
 
 function apiContentBlockFromAcpContentBlock(
   content: AcpContentBlock
-): GooseContentBlock | undefined {
+): CryonContentBlock | undefined {
   switch (content.type) {
     case 'text':
       return {
@@ -308,7 +308,7 @@ function apiContentBlockFromAcpContentBlock(
 
 function apiResourceContentsFromAcpResource(
   resource: Extract<AcpContentBlock, { type: 'resource' }>['resource']
-): Extract<GooseContentBlock, { type: 'resource' }>['resource'] {
+): Extract<CryonContentBlock, { type: 'resource' }>['resource'] {
   if ('text' in resource) {
     return {
       uri: resource.uri,
@@ -336,7 +336,7 @@ interface DesktopMcpAppMeta extends Record<string, unknown> {
 }
 
 type ToolResultValue = {
-  content: GooseContentBlock[];
+  content: CryonContentBlock[];
   structuredContent?: unknown;
   isError: boolean;
   _meta?: DesktopMcpAppMeta;
@@ -347,12 +347,12 @@ function mcpAppMetadata(update: ToolCallUpdate): DesktopMcpAppMeta | undefined {
     return undefined;
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !isRecord(goose.mcpApp)) {
+  const cryon = update._meta.cryon;
+  if (!isRecord(cryon) || !isRecord(cryon.mcpApp)) {
     return undefined;
   }
 
-  const resourceUri = goose.mcpApp.resourceUri;
+  const resourceUri = cryon.mcpApp.resourceUri;
   if (typeof resourceUri !== 'string') {
     return undefined;
   }
@@ -362,11 +362,11 @@ function mcpAppMetadata(update: ToolCallUpdate): DesktopMcpAppMeta | undefined {
       resourceUri,
     },
     extensionName:
-      typeof goose.mcpApp.extensionName === 'string' ? goose.mcpApp.extensionName : undefined,
-    toolName: typeof goose.mcpApp.toolName === 'string' ? goose.mcpApp.toolName : undefined,
+      typeof cryon.mcpApp.extensionName === 'string' ? cryon.mcpApp.extensionName : undefined,
+    toolName: typeof cryon.mcpApp.toolName === 'string' ? cryon.mcpApp.toolName : undefined,
     toolNameIsActual:
-      typeof goose.mcpApp.toolNameIsActual === 'boolean'
-        ? goose.mcpApp.toolNameIsActual
+      typeof cryon.mcpApp.toolNameIsActual === 'boolean'
+        ? cryon.mcpApp.toolNameIsActual
         : undefined,
   };
 }

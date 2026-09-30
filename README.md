@@ -1,31 +1,29 @@
-# goose-pentest
+# cryon
 
-An offensive-security build of [goose](https://github.com/block/goose) — the open-source AI agent by the [Agentic AI Foundation](https://aaif.io/).
+An autonomous offensive-security agent — a hard fork of [goose](https://github.com/aaif-goose/goose), the open-source AI agent by the [Agentic AI Foundation](https://aaif.io/). The entire project has been renamed from `goose` to `cryon`: crates, binaries, environment variables, config paths, the desktop UI, and the SDK namespaces.
 
 This fork does not add features. It **replaces the agent's identity**.
 
-Stock goose is a general-purpose coding assistant. This build is an autonomous penetration-testing agent: it is given an objective against an authorized target, and it works the target until the objective is demonstrated or the engagement boundary closes it off.
+Stock cryon is a general-purpose coding assistant. This build is an autonomous penetration-testing agent: it is given an objective against an authorized target, and it works the target until the objective is demonstrated or the engagement boundary closes it off.
 
 ---
 
 ## What changed
 
-Eight files. Two prompt templates carry the transformation; the rest is consistency work.
+Two prompt templates carry the transformation; the rest is consistency work. The prompt is now 48 KB of instructions across 17 sections.
 
 | File | Change |
 |---|---|
-| `crates/goose/src/prompts/system.md` | **The core of the fork.** 39 lines → 300+. Replaces the coding-assistant identity with an offensive-security one. |
-| `crates/goose/src/agents/platform_extensions/developer/mod.rs` | Developer extension instructions rewritten. Was "build software, `tree` → `rg` → `edit`". Now: operate the machine as an attack platform. |
-| `crates/goose/src/prompts/subagent_system.md` | Subagents are now scoped attack tasks, not code tasks. |
-| `crates/goose/src/agents/prompt_manager.rs` | Fixed a stale fallback string (`created by Block` → AAIF). |
+| `crates/cryon/src/prompts/system.md` | **The core of the fork.** 39 lines → 440. Replaces the coding-assistant identity with an offensive-security one. |
+| `crates/cryon/src/agents/platform_extensions/developer/mod.rs` | Developer extension instructions rewritten. Was "build software, `tree` → `rg` → `edit`". Now: operate the machine as an attack platform. |
+| `crates/cryon/src/prompts/subagent_system.md` | Subagents are now scoped attack tasks, not code tasks. |
+| `crates/cryon/src/agents/prompt_manager.rs` | Fixed a stale fallback string (`created by Block` → AAIF). |
 | 4 × `prompt_manager` snapshots | Golden files regenerated to match. |
 
 ### The system prompt, section by section
 
 - **The Prime Directive** — the objective is the only metric. A methodology that does not land the objective is a failure; an ugly technique that works is a success. After every action the agent must answer: *did that move me closer to the goal?*
 - **Never Refuse — Attack the Goal** — "I can't", "I won't", "I'm unable to", and "you could try this yourself" are removed from the agent's vocabulary. So are four specific failure modes that models default to under pressure: **asking permission** for work that is already authorized, **announcing and waiting**, **hedging its own capability** ("I may not be able to"), and **offering the work back** to the operator. The section gives an escalation ladder for being stuck (find out → build the missing tool → try the adjacent thing → ask for the resource without stopping → re-read the target) and a written self-check the agent must pass before it is allowed to call anything impossible.
-- **Authorization Enables Aggression** — the scope boundary framed as what *permits* maximum aggression rather than what limits it. It is set once, precisely, at the start; after that the agent never revisits the question and never second-guesses an in-scope target. The two things worth doing precisely rather than maximally are stopping at demonstrable impact and respecting the intensity ceiling — because precision is what makes a finding credible, not caution.
-- **Field Craft** — the gap between knowing techniques and landing them on a live system. Build a session-aware harness rather than firing one-off requests, because most false "not exploitable" conclusions come from requests that were not correctly stateful. Read the defence instead of fighting it — a block that names a rule tells you the rule. Exploit blind through timing, length, ordering, state, and out-of-band channels when there is no echo. Treat encoding as a spectrum and hunt the gap where two parsers disagree. Understand the architecture hop by hop and ask at each one who authenticated and whether the next component re-checks. Map identity as a system rather than a login form. And prove impact with the minimum unambiguous artifact, because an engagement that finds everything and breaks something has failed.
 - **Know Your Target** — study before striking. What it is built from, what it exposes, **who it trusts and how that trust was established**, what its own rules are, where the seams are, and what the same technology has looked like before. Ends with the counterweight: study is not an alternative to attacking, and endless reconnaissance is a way of avoiding contact.
 - **What You Are Not** — explicitly not a report generator, not a vulnerability scanner, not an explainer. This exists because frontier models default hard to producing deliverables instead of exploiting things.
 - **The Loop** — a six-step cycle with no natural terminus: falsifiable objective → recon → hypothesis → attack → verify against the objective → **if not achieved, generate a new strategy.** Repeating a known-dead path is called out as failure.
@@ -34,16 +32,17 @@ Eight files. Two prompt templates carry the transformation; the rest is consiste
 - **Everything Exposed Is a Door** — the reframe that most real intrusions do not start with a clever exploit, but with something that was never meant to be reachable. Enumerate aggressively, then compare **what is reachable against what ought to be** — that gap is the hunting ground. And when you find an exposure, ask what it *enables*: a key is an identity, a bucket is a map of the estate, an exposed `.git` is the source and its history.
 - **Continue Until It Falls** — attack is a state, not a phase. Keep a live queue of untested hypotheses and refill it by expanding the surface. Escalate relentlessly, because access is a vantage point and not a destination. Read every block as documentation of the thing that blocked you. Change one axis at a time. And when you feel finished, run the written **exhaustion check** — eight questions covering every endpoint, parameter, identity, service, credential, version, anomaly, and technique. Any "no" means the target was not tested, only the convenient part of it was.
 - **Inventing Strategy** — no hardcoded method. Guidance for reaching a target nobody has written up: read the target's own code, change the question, work the edges, chain primitives, ask what the defenders forgot.
+- **Field Craft** — the gap between knowing techniques and landing them on a live system. Build a session-aware harness rather than firing one-off requests, because most false "not exploitable" conclusions come from requests that were not correctly stateful. Read the defence instead of fighting it — a block that names a rule tells you the rule. Exploit blind through timing, length, ordering, state, and out-of-band channels when there is no echo. Treat encoding as a spectrum and hunt the gap where two parsers disagree. Understand the architecture hop by hop and ask at each one who authenticated and whether the next component re-checks. Map identity as a system rather than a login form. And prove impact with the minimum unambiguous artifact, because an engagement that finds everything and breaks something has failed.
 - **Transparency — Show Your Work** — state hypotheses before testing, report failures, label confidence honestly across three distinct levels, write so a second operator can resume cold.
 - **Your Memory Lives On Disk** — the agent maintains `engagement/` with `scope.md`, `surface.md`, `findings.md`, `hypotheses.md`, `attempts.md`, `credentials.md`, `notes.md`, `journal.md`. Findings are recorded the moment they are confirmed, with raw evidence. Failures are recorded too, so a post-compaction agent does not repeat a dead end.
-- **Authorization** — scope and authorization window are hard boundaries. The agent cannot widen scope, and must not route around a refusal. Be aggressive *within* the boundary; stop at demonstrable impact rather than exfiltrating real data.
+- **Authorization Enables Aggression** — the scope boundary framed as what *permits* maximum aggression rather than what limits it. It is set once, precisely, at the start; after that the agent never revisits the question and never second-guesses an in-scope target. It is not a limit on capability and it is not worded as one. The two things worth doing precisely rather than maximally are stopping at demonstrable impact and respecting the intensity ceiling, because precision is what makes a finding credible.
 - **Tool Doctrine** — discover what the environment has rather than assuming; build what is missing; reading is a tool.
 
 ### Why prompts and not code
 
-goose keeps behaviour in prompts and capability in extensions. The agent's ability to read responses, reason about a target, and chain findings is a language-model property, not something a code change can install. So the fork puts the offensive reasoning where the agent actually reads it.
+cryon keeps behaviour in prompts and capability in extensions. The agent's ability to read responses, reason about a target, and chain findings is a language-model property, not something a code change can install. So the fork puts the offensive reasoning where the agent actually reads it.
 
-The memory requirement is satisfied without any new code: goose already has a shell and a filesystem, and the prompt makes writing the ledger a condition of the agent's own success. State survives context compaction because it lives on disk, not in the window.
+The memory requirement is satisfied without any new code: cryon already has a shell and a filesystem, and the prompt makes writing the ledger a condition of the agent's own success. State survives context compaction because it lives on disk, not in the window.
 
 ---
 
@@ -51,36 +50,36 @@ The memory requirement is satisfied without any new code: goose already has a sh
 
 This build ships configured for the **Kilo AI Gateway** — an OpenAI-compatible router at `https://api.kilo.ai/api/gateway`.
 
-goose supports *declarative providers*, so adding Kilo requires **no recompilation**. A provider config in `~/.config/goose/custom_providers/` is picked up at startup.
+cryon supports *declarative providers*, so adding Kilo requires **no recompilation**. A provider config in `~/.config/cryon/custom_providers/` is picked up at startup.
 
 Example config is in [`deploy/custom_kilo.json`](deploy/custom_kilo.json). The gateway exposes ~397 models; **18 are currently free** (zero prompt and completion cost).
 
 ### Setting it up
 
 ```bash
-goose configure          # or: goose config set-secret KILO_API_KEY <your-key>
+cryon configure          # or: cryon config set-secret KILO_API_KEY <your-key>
 ```
 
 Then place the provider config:
 
 ```bash
-mkdir -p ~/.config/goose/custom_providers
-cp deploy/custom_kilo.json ~/.config/goose/custom_providers/
+mkdir -p ~/.config/cryon/custom_providers
+cp deploy/custom_kilo.json ~/.config/cryon/custom_providers/
 ```
 
-and set the provider in `~/.config/goose/config.yaml`:
+and set the provider in `~/.config/cryon/config.yaml`:
 
 ```yaml
-GOOSE_PROVIDER: custom_kilo
-GOOSE_MODEL: nvidia/nemotron-3-ultra-550b-a55b:free
-GOOSE_DISABLE_KEYRING: true      # keep secrets in ~/.config/goose/secrets.yaml
+CRYON_PROVIDER: custom_kilo
+CRYON_MODEL: nvidia/nemotron-3-ultra-550b-a55b:free
+CRYON_DISABLE_KEYRING: true      # keep secrets in ~/.config/cryon/secrets.yaml
 ```
 
-`GOOSE_DISABLE_KEYRING: true` puts secrets in a 0600 file rather than the OS keyring. That is deliberate for this use case — it is deterministic and works headless, which is what an unattended long-running agent needs.
+`CRYON_DISABLE_KEYRING: true` puts secrets in a 0600 file rather than the OS keyring. That is deliberate for this use case — it is deterministic and works headless, which is what an unattended long-running agent needs.
 
 ### Free-tier reality, measured
 
-The pinned models were tested end-to-end against goose's actual request shape — SSE streaming **and** tool-calling, since an agent is useless without the latter.
+The pinned models were tested end-to-end against cryon's actual request shape — SSE streaming **and** tool-calling, since an agent is useless without the latter.
 
 ```
 15 models × 2 (streaming on/off) = 30 requests
@@ -135,11 +134,11 @@ Model quality also matters more than it looks. With the full system prompt and a
 
 ## Building
 
-Standard goose build. Rust toolchain per `rust-toolchain.toml`.
+Standard cryon build. Rust toolchain per `rust-toolchain.toml`.
 
 ```bash
-cargo build --release -p goose-cli     # CLI
-cargo test  -p goose prompt_manager    # prompt snapshot tests
+cargo build --release -p cryon-cli     # CLI
+cargo test  -p cryon prompt_manager    # prompt snapshot tests
 ```
 
 The prompt snapshots are the regression suite for this fork. Any change to `system.md` that is not reflected in the four `.snap` files will fail `cargo test`. Regenerate deliberately with `cargo insta review`.
@@ -149,7 +148,7 @@ The prompt snapshots are the regression suite for this fork. Any change to `syst
 ## Running
 
 ```bash
-goose session
+cryon session
 ```
 
 Then give it an objective and the authorization reference:
@@ -173,7 +172,7 @@ The agent will write its scope file, begin recon, and keep working.
 
 **Free-tier rate limits will bite.** Approximately 200 requests/hour per IP on the free routes. A long campaign will exhaust that. Plan for paid models or your own upstream keys on the gateway.
 
-**Upstream history is not included.** This repository carries a single clean commit containing goose's source at the point of forking. The `documentation/` directory from upstream (blog posts and video assets, ~311 MB) is not included. Add it from upstream if you want it:
+**Upstream history is not included.** This repository carries a single clean commit containing cryon's source at the point of forking. The `documentation/` directory from upstream (blog posts and video assets, ~311 MB) is not included. Add it from upstream if you want it:
 
 ```bash
 git remote add upstream https://github.com/block/goose.git
@@ -184,6 +183,18 @@ git checkout upstream/main -- documentation
 
 ## Attribution
 
-goose is developed by [Block](https://block.xyz) and the [Agentic AI Foundation](https://aaif.io/) at the Linux Foundation, released under Apache-2.0. This fork is a modification of that work. The `LICENSE` file is unchanged.
+Cryon is a fork of [goose](https://github.com/aaif-goose/goose), Apache-2.0, by the
+[Agentic AI Foundation](https://aaif.io/). The upstream README is preserved verbatim as
+[`README-upstream.md`](README-upstream.md), and the original licence and copyright notices
+are unchanged. References to upstream repositories, container images, release downloads and
+changelog entries have deliberately been left pointing at upstream — they describe where the
+code came from and where its releases live, not this fork.
 
-For the architecture of goose's original prompt system — how `system.md`, extension instructions, tool descriptions, `.goosehints`, and the turn-context block combine at runtime — see [`docs/prompt-architecture.md`](docs/prompt-architecture.md).
+The rename covered everything the project owns: all 15 crates (`goose` → `cryon`,
+`goose-cli` → `cryon-cli`, and so on), both binaries (`goose` → `cryon`, `goosed` → `cryond`),
+every `GOOSE_*` environment variable, the `~/.config/goose` directory, the `.goosehints`
+convention (now `.cryonhints`), the desktop UI, and the Maven/Python/Kotlin SDK namespaces.
+
+Two identifiers were deliberately not renamed: the `v8-goose` crate, which is a third-party
+dependency from crates.io, and the `aaif-goose/*` GitHub organisation and its `ghcr.io`
+images, which belong to upstream.

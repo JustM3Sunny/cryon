@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ProviderDeviceCodeNotification_unstable } from '@aaif/goose-acp-client';
+import type { ProviderDeviceCodeNotification_unstable } from '@aaif/cryon-acp-client';
 
 export function useProviderDeviceCode(providerId: string) {
   const [deviceCode, setDeviceCode] = useState<ProviderDeviceCodeNotification_unstable | null>(
@@ -13,8 +13,8 @@ export function useProviderDeviceCode(providerId: string) {
         setDeviceCode(detail);
       }
     };
-    window.addEventListener('goose:device-code', handler);
-    return () => window.removeEventListener('goose:device-code', handler);
+    window.addEventListener('cryon:device-code', handler);
+    return () => window.removeEventListener('cryon:device-code', handler);
   }, [providerId]);
 
   return {

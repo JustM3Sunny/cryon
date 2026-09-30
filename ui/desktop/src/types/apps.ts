@@ -39,7 +39,7 @@ export type WindowProps = {
   width?: number;
 };
 
-export type GooseApp = McpAppResource &
+export type CryonApp = McpAppResource &
   WindowProps & {
     mcpServers?: string[];
     prd?: string | null;

@@ -1,0 +1,28 @@
+{
+  "name": "@aaif/cryon-binary-darwin-arm64",
+  "version": "1.53.0",
+  "description": "Cryon binary for macOS ARM64",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaif-goose/goose.git"
+  },
+  "keywords": [
+    "cryon",
+    "ai",
+    "agent",
+    "binary"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "bin": {
+    "cryon-binary-darwin-arm64": "./bin/cryon"
+  },
+  "files": [
+    "bin/cryon"
+  ]
+}

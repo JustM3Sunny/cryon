@@ -1,4 +1,4 @@
-import type { GooseSessionNotification_unstable } from '@aaif/goose-acp-client';
+import type { CryonSessionNotification_unstable } from '@aaif/cryon-acp-client';
 import type { RequestPermissionRequest, SessionNotification } from '@agentclientprotocol/sdk';
 import { describe, expect, it } from 'vitest';
 import { getToolResponses, type Message, type NotificationEvent } from '../../types/message';
@@ -28,9 +28,9 @@ function acpUpdate(update: SessionNotification['update']): SessionNotification {
   };
 }
 
-function gooseUpdate(
-  update: GooseSessionNotification_unstable['update']
-): GooseSessionNotification_unstable {
+function cryonUpdate(
+  update: CryonSessionNotification_unstable['update']
+): CryonSessionNotification_unstable {
   return {
     sessionId: SESSION_ID,
     update,
@@ -172,7 +172,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_message_chunk',
             content: { type: 'text', text: 'Partial response' },
-            _meta: { goose: { messageId: 'msg-1' } },
+            _meta: { cryon: { messageId: 'msg-1' } },
           } as SessionNotification['update'])
         );
 
@@ -182,7 +182,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'agent_message_chunk',
               content: { type: 'text', text: OUTPUT_TOKEN_LIMIT_FALLBACK_TEXT },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'msg-1',
                   outputTokenLimitReached: true,
                   fallbackContent: true,
@@ -221,7 +221,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'hel' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -245,7 +245,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'lo' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -263,7 +263,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'image', data: 'base64-image', mimeType: 'image/png' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -296,7 +296,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'ha' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -314,7 +314,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'user_message_chunk',
               content: { type: 'text', text: 'ha' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'steer-1',
                   steer: true,
                 },
@@ -362,7 +362,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'agent_thought_chunk',
               content: { type: 'text', text: 'Truncated thinking' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'thought-1',
                   outputTokenLimitReached: true,
                 },
@@ -382,7 +382,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           acpUpdate({
             sessionUpdate: 'agent_thought_chunk',
             content: { type: 'text', text: 'Truncated ' },
-            _meta: { goose: { messageId: 'thought-1' } },
+            _meta: { cryon: { messageId: 'thought-1' } },
           } as SessionNotification['update'])
         );
 
@@ -392,7 +392,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               sessionUpdate: 'agent_thought_chunk',
               content: { type: 'text', text: 'thinking' },
               _meta: {
-                goose: {
+                cryon: {
                   messageId: 'thought-1',
                   outputTokenLimitReached: true,
                 },
@@ -424,7 +424,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             rawInput: { path: 'README.md' },
             locations: [{ path: 'README.md', line: 1 }],
             _meta: {
-              goose: {
+              cryon: {
                 toolCall: {
                   extensionName: 'developer',
                   toolName: 'read_file',
@@ -469,7 +469,7 @@ describe('createAcpSessionNotificationAdapter', () => {
               },
             ],
             _meta: {
-              goose: {
+              cryon: {
                 mcpApp: {
                   resourceUri: 'ui://app/resource',
                   extensionName: 'developer',
@@ -859,13 +859,13 @@ describe('createAcpSessionNotificationAdapter', () => {
     });
   });
 
-  describe('applyGoose', () => {
+  describe('applyCryon', () => {
     it('maps usage updates into token state', () => {
       const adapter = createAcpSessionNotificationAdapter();
 
       expect(
-        adapter.applyGoose(
-          gooseUpdate({
+        adapter.applyCryon(
+          cryonUpdate({
             sessionUpdate: 'usage_update',
             used: 42,
             contextLimit: 200,
@@ -892,8 +892,8 @@ describe('createAcpSessionNotificationAdapter', () => {
     it('maps status messages and keeps later id-less chunks separate', () => {
       const adapter = createAcpSessionNotificationAdapter();
 
-      const noticeStateChanges = adapter.applyGoose(
-        gooseUpdate({
+      const noticeStateChanges = adapter.applyCryon(
+        cryonUpdate({
           sessionUpdate: 'status_message',
           status: { type: 'notice', message: 'Checking files' },
         })
@@ -914,8 +914,8 @@ describe('createAcpSessionNotificationAdapter', () => {
       expect(messages).toHaveLength(2);
       expect(firstContent(messages[1])).toMatchObject({ type: 'text', text: 'Result' });
 
-      const progressStateChanges = adapter.applyGoose(
-        gooseUpdate({
+      const progressStateChanges = adapter.applyCryon(
+        cryonUpdate({
           sessionUpdate: 'status_message',
           status: { type: 'progress', message: 'Still working' },
         })
@@ -942,7 +942,7 @@ describe('createAcpSessionNotificationAdapter', () => {
             },
           ],
           _meta: {
-            goose: {
+            cryon: {
               toolCall: {
                 toolName: 'edit_file',
               },
@@ -1017,7 +1017,7 @@ describe('createAcpSessionNotificationAdapter', () => {
         acpUpdate({
           sessionUpdate: 'session_info_update',
           _meta: {
-            goose: {
+            cryon: {
               queuedSteer: { messageId: 'steer-msg-1', runId: 'run-1' },
             },
           },
@@ -1034,7 +1034,7 @@ describe('createAcpSessionNotificationAdapter', () => {
           sessionUpdate: 'session_info_update',
           title: 'New Title',
           _meta: {
-            goose: {
+            cryon: {
               queuedSteer: { messageId: 'steer-msg-2', runId: 'run-2' },
             },
           },

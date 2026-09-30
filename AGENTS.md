@@ -1,10 +1,10 @@
 # AGENTS Instructions
 
-goose is an AI agent framework in Rust with CLI and Electron desktop interfaces.
+cryon is an AI agent framework in Rust with CLI and Electron desktop interfaces.
 
 ## Contribution Workflow
 
-The issue is the source of truth for work intended for an upstream pull request. Track issue status on the [Goose Issues board](https://github.com/orgs/aaif-goose/projects/1).
+The issue is the source of truth for work intended for an upstream pull request. Track issue status on the [Cryon Issues board](https://github.com/orgs/aaif-goose/projects/1).
 
 - Before implementing an issue for a pull request, confirm that it is on the board with Status **Ready**.
 - Do not implement issues in **Inbox**, **Needs info**, or **Accepted / design**. Help resolve the issue discussion instead.
@@ -18,11 +18,11 @@ Maintainer-directed work, urgent security fixes, release automation, and local o
 
 ## MCP Server Directory
 
-goose is retiring its project-specific MCP server directory in favor of the [official MCP Registry](https://github.com/modelcontextprotocol/registry) and its `server.json` format.
+cryon is retiring its project-specific MCP server directory in favor of the [official MCP Registry](https://github.com/modelcontextprotocol/registry) and its `server.json` format.
 
 - Do not add new third-party servers to `documentation/static/servers.json`; these contributions are no longer accepted.
 - Direct server authors to publish to the official MCP Registry instead.
-- Treat the existing goose directory as legacy data while registry-backed discovery and installation are implemented.
+- Treat the existing cryon directory as legacy data while registry-backed discovery and installation are implemented.
 - Changes that maintain, migrate, or remove existing directory entries are allowed when they support the migration and are within an approved issue's scope.
 
 See [Discussion #10830](https://github.com/aaif-goose/goose/discussions/10830) for the decision and migration direction.
@@ -38,7 +38,7 @@ Write issue and pull request comments for humans, not as exhaustive work logs.
 
 ## Agent Loop Migration
 
-We are replacing the legacy agent loop in `crates/goose/src/agents/agent.rs` with the state machine in `crates/goose/src/agents/state_machine/`. The state-machine path is enabled with `GOOSE_STATE_MACHINE=1`.
+We are replacing the legacy agent loop in `crates/cryon/src/agents/agent.rs` with the state machine in `crates/cryon/src/agents/state_machine/`. The state-machine path is enabled with `CRYON_STATE_MACHINE=1`.
 
 Until the migration is complete, changes to agent-loop behavior must be implemented and tested in both paths. When reviewing code, check whether a change to either path also applies to the other and flag missing parity.
 
@@ -60,8 +60,8 @@ just release-binary           # release binary
 ### Test
 ```bash
 cargo test                   # all tests
-cargo test -p goose          # specific crate
-cargo test --package goose --test mcp_integration_test
+cargo test -p cryon          # specific crate
+cargo test --package cryon --test mcp_integration_test
 just record-mcp-tests        # record MCP
 ```
 
@@ -85,7 +85,7 @@ ui/desktop/   # Electron app
 ui/text/      # deprecated ACP TUI (see ui/text/README.md)
 ```
 
-Some workspace crates, including those that make up the GDK, are published to crates.io and expose public APIs. The authoritative list of GDK crates is the `release = true`, `version_group = "gdk"` package set in `release-plz.toml`, which drives the GDK release; run `python3 crates/goose-sdk/scripts/gdk-release.py crates` to print it. Other crates, such as `goose` and `goose-cli`, do not provide stable public APIs; their `pub` items are internal implementation details and may change without notice.
+Some workspace crates, including those that make up the GDK, are published to crates.io and expose public APIs. The authoritative list of GDK crates is the `release = true`, `version_group = "gdk"` package set in `release-plz.toml`, which drives the GDK release; run `python3 crates/cryon-sdk/scripts/gdk-release.py crates` to print it. Other crates, such as `cryon` and `cryon-cli`, do not provide stable public APIs; their `pub` items are internal implementation details and may change without notice.
 
 ## Development Loop
 ```bash
@@ -103,11 +103,11 @@ Some workspace crates, including those that make up the GDK, are published to cr
 
 ## Rules
 
-- Test: Prefer tests/ folder, e.g. crates/goose/tests/
-- Test: When adding features, update goose-self-test.yaml, rebuild, then run `goose run --recipe goose-self-test.yaml` to validate
+- Test: Prefer tests/ folder, e.g. crates/cryon/tests/
+- Test: When adding features, update cryon-self-test.yaml, rebuild, then run `cryon run --recipe cryon-self-test.yaml` to validate
 - Error: Use anyhow::Result
 - Provider: Implement Provider trait see providers/base.rs
-- MCP: Extensions in crates/goose-mcp/
+- MCP: Extensions in crates/cryon-mcp/
 - UI Desktop: Use ACP SDK types or local `src/types/*` types. Do not import generated OpenAPI types/client code from `ui/desktop/src/api`
 
 ## Code Quality
@@ -132,6 +132,6 @@ Some workspace crates, including those that make up the GDK, are published to cr
 - Never: Overwrite a live binary in place (e.g. `cp`/`fs.copyFileSync` onto an existing executable) - unlink or atomic-rename the destination first, otherwise macOS SIGKILLs running processes with "Code Signature Invalid"
 
 ## Entry Points
-- CLI: crates/goose-cli/src/main.rs
+- CLI: crates/cryon-cli/src/main.rs
 - UI: ui/desktop/src/main.ts
-- Agent: crates/goose/src/agents/agent.rs
+- Agent: crates/cryon/src/agents/agent.rs

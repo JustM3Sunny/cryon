@@ -1,10 +1,10 @@
 {
   "private": true,
   "workspaces": [
-    "goose-acp-client",
-    "goose-acp",
+    "cryon-acp-client",
+    "cryon-acp",
     "desktop",
-    "goose-binary/*"
+    "cryon-binary/*"
   ],
   "scripts": {
     "changeset": "changeset",

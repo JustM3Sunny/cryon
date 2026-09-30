@@ -23,24 +23,24 @@ download_release_binaries() {
   gh release download "$release_tag" \
     --repo "$repository" \
     --dir "$asset_dir" \
-    --pattern 'goose-aarch64-apple-darwin.tar.bz2' \
-    --pattern 'goose-x86_64-apple-darwin.tar.bz2' \
-    --pattern 'goose-aarch64-unknown-linux-gnu.tar.bz2' \
-    --pattern 'goose-x86_64-unknown-linux-gnu.tar.bz2' \
-    --pattern 'goose-x86_64-pc-windows-msvc.zip'
+    --pattern 'cryon-aarch64-apple-darwin.tar.bz2' \
+    --pattern 'cryon-x86_64-apple-darwin.tar.bz2' \
+    --pattern 'cryon-aarch64-unknown-linux-gnu.tar.bz2' \
+    --pattern 'cryon-x86_64-unknown-linux-gnu.tar.bz2' \
+    --pattern 'cryon-x86_64-pc-windows-msvc.zip'
 }
 
 copy_unix_binary() {
   local platform="$1"
   local target="$2"
   local extract_dir="$extract_root/$platform"
-  local destination="$repo_root/ui/goose-binary/goose-binary-$platform/bin/goose"
+  local destination="$repo_root/ui/cryon-binary/cryon-binary-$platform/bin/cryon"
 
   mkdir -p "$extract_dir" "$(dirname "$destination")"
-  tar -xjf "$asset_dir/goose-$target.tar.bz2" -C "$extract_dir"
-  test -f "$extract_dir/goose"
+  tar -xjf "$asset_dir/cryon-$target.tar.bz2" -C "$extract_dir"
+  test -f "$extract_dir/cryon"
   rm -f "$destination"
-  install -m 755 "$extract_dir/goose" "$destination"
+  install -m 755 "$extract_dir/cryon" "$destination"
 }
 
 copy_release_binaries() {
@@ -50,12 +50,12 @@ copy_release_binaries() {
   copy_unix_binary linux-x64 x86_64-unknown-linux-gnu
 
   local extract_dir="$extract_root/win32-x64"
-  local destination="$repo_root/ui/goose-binary/goose-binary-win32-x64/bin/goose.exe"
+  local destination="$repo_root/ui/cryon-binary/cryon-binary-win32-x64/bin/cryon.exe"
   mkdir -p "$extract_dir" "$(dirname "$destination")"
-  unzip -q "$asset_dir/goose-x86_64-pc-windows-msvc.zip" -d "$extract_dir"
-  test -f "$extract_dir/goose-package/goose.exe"
+  unzip -q "$asset_dir/cryon-x86_64-pc-windows-msvc.zip" -d "$extract_dir"
+  test -f "$extract_dir/cryon-package/cryon.exe"
   rm -f "$destination"
-  install -m 755 "$extract_dir/goose-package/goose.exe" "$destination"
+  install -m 755 "$extract_dir/cryon-package/cryon.exe" "$destination"
 }
 
 assert_version() {
@@ -74,19 +74,19 @@ current_platform() {
 
 current_platform_binary() {
   local platform
-  local executable="goose"
+  local executable="cryon"
   platform="$(current_platform)"
 
   case "$platform" in
     darwin-arm64 | darwin-x64 | linux-arm64 | linux-x64) ;;
-    win32-x64) executable="goose.exe" ;;
+    win32-x64) executable="cryon.exe" ;;
     *)
-      echo "No Goose npm binary is available for $platform" >&2
+      echo "No Cryon npm binary is available for $platform" >&2
       return 1
       ;;
   esac
 
-  echo "$repo_root/ui/goose-binary/goose-binary-$platform/bin/$executable"
+  echo "$repo_root/ui/cryon-binary/cryon-binary-$platform/bin/$executable"
 }
 
 verify_release_versions() {
@@ -102,13 +102,13 @@ verify_release_versions() {
 
 pack_packages() {
   local packages=(
-    ui/goose-binary/goose-binary-darwin-arm64
-    ui/goose-binary/goose-binary-darwin-x64
-    ui/goose-binary/goose-binary-linux-arm64
-    ui/goose-binary/goose-binary-linux-x64
-    ui/goose-binary/goose-binary-win32-x64
-    ui/goose-acp
-    ui/goose-acp-client
+    ui/cryon-binary/cryon-binary-darwin-arm64
+    ui/cryon-binary/cryon-binary-darwin-x64
+    ui/cryon-binary/cryon-binary-linux-arm64
+    ui/cryon-binary/cryon-binary-linux-x64
+    ui/cryon-binary/cryon-binary-win32-x64
+    ui/cryon-acp
+    ui/cryon-acp-client
   )
   local package
 
@@ -141,7 +141,7 @@ verify_packed_wrapper() {
       "$output_dir/aaif-goose-acp-$release_version.tgz"
 
     assert_version "Packed wrapper" \
-      "$(env -u GOOSE_BINARY "$repo_root/bin/pnpm" exec goose --version | xargs)"
+      "$(env -u CRYON_BINARY "$repo_root/bin/pnpm" exec cryon --version | xargs)"
   )
 }
 

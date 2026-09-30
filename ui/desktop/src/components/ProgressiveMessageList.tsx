@@ -1,7 +1,7 @@
 import { Fragment, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { defineMessages, useIntl } from '../i18n';
-import GooseMessage from './GooseMessage';
+import CryonMessage from './CryonMessage';
 import UserMessage from './UserMessage';
 import {
   SystemNotificationInline,
@@ -17,7 +17,7 @@ import type {
   NotificationEvent,
   SystemNotificationContent,
 } from '../types/message';
-import LoadingGoose from './LoadingGoose';
+import LoadingCryon from './LoadingCryon';
 import { getModelDisplayName } from './settings/models/predefinedModelsUtils';
 import { deriveMessageRowContexts, type MessageRowContext } from './messageRowContext';
 
@@ -128,7 +128,7 @@ function MessageRowComponent({
             <UserMessage message={message} onMessageUpdate={onMessageUpdate} />
           )
         ) : (
-          <GooseMessage
+          <CryonMessage
             sessionId={sessionId}
             message={message}
             hideTimestamp={rowContext.hideTimestamp}
@@ -295,7 +295,7 @@ export default function ProgressiveMessageList({
 
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-8">
-          <LoadingGoose
+          <LoadingCryon
             message={intl.formatMessage(i18n.loadingMessages, {
               renderedCount,
               totalCount: messages.length,

@@ -5,8 +5,8 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-type GooseTestFixtures = {
-  goosePage: Page;
+type CryonTestFixtures = {
+  cryonPage: Page;
 };
 
 /**
@@ -16,19 +16,19 @@ type GooseTestFixtures = {
  * Speed: ⚠️ Slow - ~3s startup overhead per test
  *
  * This ensures each test starts with a fresh app instance, but the app uses the
- * user's existing Goose configuration (providers, models, etc.).
+ * user's existing Cryon configuration (providers, models, etc.).
  *
  * Usage:
  *   import { test, expect } from './fixtures';
  *
- *   test('my test', async ({ goosePage }) => {
- *     await goosePage.waitForSelector('[data-testid="chat-input"]');
+ *   test('my test', async ({ cryonPage }) => {
+ *     await cryonPage.waitForSelector('[data-testid="chat-input"]');
  *     // ... test code
  *   });
  */
-export const test = base.extend<GooseTestFixtures>({
+export const test = base.extend<CryonTestFixtures>({
   // Test-scoped fixture: launches a fresh Electron app for each test
-  goosePage: async ({ browserName }, providePage, testInfo) => {
+  cryonPage: async ({ browserName }, providePage, testInfo) => {
     void browserName;
     console.log(`Launching fresh Electron app for test: ${testInfo.title}`);
 
@@ -51,10 +51,10 @@ export const test = base.extend<GooseTestFixtures>({
           ...process.env,
           ELECTRON_IS_DEV: '1',
           NODE_ENV: 'development',
-          GOOSE_ALLOWLIST_BYPASS: 'true',
+          CRYON_ALLOWLIST_BYPASS: 'true',
           ENABLE_PLAYWRIGHT: 'true',
           PLAYWRIGHT_DEBUG_PORT: debugPort.toString(), // Unique port per test for parallel execution
-          RUST_LOG: 'info', // Enable info-level logging for goosed backend
+          RUST_LOG: 'info', // Enable info-level logging for cryond backend
         }
       });
 

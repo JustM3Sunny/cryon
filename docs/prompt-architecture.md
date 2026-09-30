@@ -1,18 +1,18 @@
-# goose — System Prompts & Agent-Defining Code: Complete Map
+# cryon — System Prompts & Agent-Defining Code: Complete Map
 
-> Repo: `/home/user/goose` · commit `5850d4a` (2026-09-30) · version 1.53.0
-> Ye map batata hai ki goose ko "general-purpose coding agent" **kaun banata hai** — aur woh saara text kahan rehta hai.
+> Repo: `/home/user/cryon` · commit `5850d4a` (2026-09-30) · version 1.53.0
+> Ye map batata hai ki cryon ko "general-purpose coding agent" **kaun banata hai** — aur woh saara text kahan rehta hai.
 
 ---
 
 ## 0. TL;DR — Asli jawab
 
-Log sochte hain goose ka system prompt ek bada file hoga. **Nahi hai.**
+Log sochte hain cryon ka system prompt ek bada file hoga. **Nahi hai.**
 
-`crates/goose/src/prompts/system.md` sirf **39 lines** ka hai aur usme literally likha hai:
+`crates/cryon/src/prompts/system.md` sirf **39 lines** ka hai aur usme literally likha hai:
 
 ```
-You are a general-purpose AI agent called goose, created by AAIF (Agentic AI Foundation).
+You are a general-purpose AI agent called cryon, created by AAIF (Agentic AI Foundation).
 ...
 # Response Guidelines
 Use Markdown formatting for all responses.
@@ -22,12 +22,12 @@ Bas. "Coding agent" wala behavior **3 alag jagah se** aata hai:
 
 | # | Layer | Kahan | Kya karta hai |
 |---|---|---|---|
-| 1 | **Core template** | `crates/goose/src/prompts/system.md` | Identity + extension list + response format |
+| 1 | **Core template** | `crates/cryon/src/prompts/system.md` | Identity + extension list + response format |
 | 2 | **Extension instructions** | har extension ke `with_instructions()` calls | Asli behavioural rules (developer, analyze, todo, skills...) |
 | 3 | **Tool descriptions** | `Tool::new(name, description, schema)` | Model ko dikhne wala sabse crisp instruction surface |
-| + | **Hints** | `.goosehints` / `AGENTS.md` (user ke repo me) | Project-specific knowledge |
+| + | **Hints** | `.cryonhints` / `AGENTS.md` (user ke repo me) | Project-specific knowledge |
 
-**Key insight:** goose monolith nahi hai. Uska "personality" **runtime pe assemble hota hai** — enabled extensions + user ke hint files + mode + working directory ke hisaab se. Isliye hi system prompt har session me different hota hai.
+**Key insight:** cryon monolith nahi hai. Uska "personality" **runtime pe assemble hota hai** — enabled extensions + user ke hint files + mode + working directory ke hisaab se. Isliye hi system prompt har session me different hota hai.
 
 ---
 
@@ -36,7 +36,7 @@ Bas. "Coding agent" wala behavior **3 alag jagah se** aata hai:
 ```
                         ┌─────────────────────────────────────────┐
                         │  1. system.md (MiniJinja template)      │
-                        │     crates/goose/src/prompts/system.md  │
+                        │     crates/cryon/src/prompts/system.md  │
                         └────────────────┬────────────────────────┘
                                          │ render_template("system.md", ctx)
                                          ▼
@@ -45,7 +45,7 @@ Bas. "Coding agent" wala behavior **3 alag jagah se** aata hai:
                         │     agents/prompt_manager.rs:230        │
                         └────────────────┬────────────────────────┘
                                          │ + system_prompt_extras
-                                         │ + hints (.goosehints/AGENTS.md)
+                                         │ + hints (.cryonhints/AGENTS.md)
                                          │ + chat_mode note (agar Chat mode)
                                          ▼
                         ┌─────────────────────────────────────────┐
@@ -59,19 +59,19 @@ Bas. "Coding agent" wala behavior **3 alag jagah se** aata hai:
                         └─────────────────────────────────────────┘
 ```
 
-**Entry point:** `crates/goose/src/agents/state_machine/inference_preparation.rs:53`
+**Entry point:** `crates/cryon/src/agents/state_machine/inference_preparation.rs:53`
 
 ---
 
 ## 2. Layer 1 — Core System Prompt Template
 
-**File:** `crates/goose/src/prompts/system.md` (39 lines, 1,232 bytes)
+**File:** `crates/cryon/src/prompts/system.md` (39 lines, 1,232 bytes)
 
 ### Poora content
 
 ```jinja
-You are a general-purpose AI agent called goose, created by AAIF (Agentic AI Foundation).
-goose is being developed as an open-source software project.
+You are a general-purpose AI agent called cryon, created by AAIF (Agentic AI Foundation).
+cryon is being developed as an open-source software project.
 
 {% if moim_system_prompt_block is defined %}
 {{ moim_system_prompt_block }}
@@ -122,8 +122,8 @@ Use Markdown formatting for all responses.
 | `include_extensions` | `bool` | ✅ haan | Extension section on/off |
 | `code_execution_mode` | `bool` | ✅ haan | Code Mode on ho to extension section hide |
 | `current_date_time` | `String` | ❌ **nahi** | Overrides ke liye available |
-| `goose_mode` | `GooseMode` | ❌ **nahi** | Overrides ke liye available |
-| `is_autonomous` | `bool` | ❌ **nahi** | `goose_mode == Auto` (overrides ke liye) |
+| `cryon_mode` | `CryonMode` | ❌ **nahi** | Overrides ke liye available |
+| `is_autonomous` | `bool` | ❌ **nahi** | `cryon_mode == Auto` (overrides ke liye) |
 | `enable_subagents` | `bool` | ❌ **nahi** | Overrides ke liye available |
 
 > ⚠️ **Interesting:** `current_date_time` aur `is_autonomous` context me jaate hain par default template unhe use hi nahi karta. Ye customization hooks hain — user apna template likhe to inhe access kar sakta hai. Date/time actually `<turn-context>` block ke through jaata hai (Layer 6).
@@ -144,7 +144,7 @@ Use the developer extension to build software and operate a terminal.
 
 ## 3. Layer 2 — PromptManager (dynamic assembly engine)
 
-**File:** `crates/goose/src/agents/prompt_manager.rs` (571 lines)
+**File:** `crates/cryon/src/agents/prompt_manager.rs` (571 lines)
 
 ### Struct
 
@@ -165,7 +165,7 @@ pub struct PromptManager {
 3. Base prompt render: agar `system_prompt_override` set hai to wahi, warna `system.md`.
 4. **Fallback** (line 142-144) agar template fail ho:
    ```rust
-   "You are a general-purpose AI agent called goose, created by Block".to_string()
+   "You are a general-purpose AI agent called cryon, created by Block".to_string()
    ```
 5. Extras collect karke append karta hai:
    ```
@@ -204,10 +204,10 @@ Callers:
 
 | Caller | Key | Kya add karta hai |
 |---|---|---|
-| `goose-cli/src/session/builder.rs:628` | `"additional"` | CLI ka `--system` flag |
+| `cryon-cli/src/session/builder.rs:628` | `"additional"` | CLI ka `--system` flag |
 | `acp/server/recipe/mod.rs:327` | `"recipe"` | Recipe ki instructions |
 | `agent.rs:1033` | `"final_output"` | Structured output tool ka prompt |
-| `prompt_manager.rs:152` | `"hints"` | `.goosehints` / `AGENTS.md` content |
+| `prompt_manager.rs:152` | `"hints"` | `.cryonhints` / `AGENTS.md` content |
 | `prompt_manager.rs:155` | `"chat_mode"` | Chat-only mode warning |
 | `acp/server/manage_sessions.rs:88-90` | arbitrary | Runtime pe add/remove |
 
@@ -221,7 +221,7 @@ Har extension apna `InitializeResult` banate waqt `with_instructions(...)` deta 
 
 ### 4a. `developer` — sabse important
 
-**File:** `crates/goose/src/agents/platform_extensions/developer/mod.rs:42-73`
+**File:** `crates/cryon/src/agents/platform_extensions/developer/mod.rs:42-73`
 
 Ye **platform-aware** hai — Windows aur Unix ke liye alag:
 
@@ -346,14 +346,14 @@ WORKFLOW:
 | `summarize` | `summarize.rs` | *(koi instructions nahi — sirf tool)* |
 | `summon` | `summon.rs` | *(dynamic — subagent list runtime pe build hoti hai)* |
 | `tom` | `tom.rs` | *(koi instructions nahi)* |
-| `memory` | `goose-mcp/src/memory/mod.rs:119` | Storage paths + "Save proactively... Always confirm with the user before saving" |
+| `memory` | `cryon-mcp/src/memory/mod.rs:119` | Storage paths + "Save proactively... Always confirm with the user before saving" |
 | `apps` | `apps.rs:161` | "Use this extension to create, manage, and iterate on custom HTML/CSS/JavaScript apps." |
 
 ### 4g. `skills` — dynamically injected (snapshot me dikhta hai)
 
-Built-in skills `crates/goose/src/skills/builtins/` me hain:
+Built-in skills `crates/cryon/src/skills/builtins/` me hain:
 
-- `goose_doc_guide.md`
+- `cryon_doc_guide.md`
 - `web_search.md`
 
 Ye system prompt me list ki tarah inject hote hain:
@@ -361,15 +361,15 @@ Ye system prompt me list ki tarah inject hote hain:
 ```
 You have these skills at your disposal, when it is clear they can help you solve
 a problem or you are asked to use them:
-• goose-doc-guide - Reference goose documentation to create, configure, or explain
-  goose-specific features like recipes, extensions, sessions, and providers. You MUST
-  read the relevant goose docs before answering. You MUST NOT rely on training data or
-  assumptions for any goose-specific fields, values, names, syntax, or commands.
+• cryon-doc-guide - Reference cryon documentation to create, configure, or explain
+  cryon-specific features like recipes, extensions, sessions, and providers. You MUST
+  read the relevant cryon docs before answering. You MUST NOT rely on training data or
+  assumptions for any cryon-specific fields, values, names, syntax, or commands.
 • web-search - Search the web and extract page content using DuckDuckGo (no API key
   required), Tavily, or SearXNG. Use whenever the task needs current information...
 ```
 
-> Note: `goose-doc-guide` me **"MUST NOT rely on training data"** — classic hallucination guard for evolving APIs.
+> Note: `cryon-doc-guide` me **"MUST NOT rely on training data"** — classic hallucination guard for evolving APIs.
 
 ### 4h. Platform extensions ka default on/off
 
@@ -405,30 +405,30 @@ Model ko ye exactly dikhta hai. Ye system prompt se bhi zyada important hai kyun
 |---|---|---|---|
 | `write` | "Create a new file or overwrite an existing file. Creates parent directories if needed." | false | true |
 | `edit` | "Edit a file by finding and replacing text. The before text must match exactly and uniquely. Use empty after text to delete." | false | true |
-| `shell` | "Execute a shell command in the current dir. Commands run under \`{shell}\` (set GOOSE_SHELL to override) - write command strings in that shell's syntax. Returns an object with stdout and stderr as separate fields. The output of each stream is limited to up to 2000 lines, and longer outputs will be saved to a temporary file." | false | true |
+| `shell` | "Execute a shell command in the current dir. Commands run under \`{shell}\` (set CRYON_SHELL to override) - write command strings in that shell's syntax. Returns an object with stdout and stderr as separate fields. The output of each stream is limited to up to 2000 lines, and longer outputs will be saved to a temporary file." | false | true |
 | `tree` | "List a directory tree with line counts. Traversal respects .gitignore rules." | **true** | false |
 | `read_image` | "Read an image from a local file path or http(s) URL and return it as image content for the model to inspect. Supports png, jpeg, gif, and webp." | false | false |
 
 **Windows-specific shell note** (dynamic, `mod.rs:166-172`):
-> "Commands must be on a single line — cmd.exe silently truncates at the first newline. Use `&` to chain (e.g. `echo a & echo b`) or set GOOSE_SHELL=powershell for multi-line support."
+> "Commands must be on a single line — cmd.exe silently truncates at the first newline. Use `&` to chain (e.g. `echo a & echo b`) or set CRYON_SHELL=powershell for multi-line support."
 
 > Ye ek real bug ka documentation hai, prompt me baked.
 
 ---
 
-## 6. Layer 5 — Hints (`.goosehints` / `AGENTS.md`)
+## 6. Layer 5 — Hints (`.cryonhints` / `AGENTS.md`)
 
-**File:** `crates/goose/src/hints/load_hints.rs`
+**File:** `crates/cryon/src/hints/load_hints.rs`
 
 ```rust
-pub const GOOSE_HINTS_FILENAME: &str = ".goosehints";
+pub const CRYON_HINTS_FILENAME: &str = ".cryonhints";
 pub const AGENTS_MD_FILENAME: &str = "AGENTS.md";
 
 pub fn get_context_filenames() -> Vec<String> {
     Config::global()
         .get_param::<Vec<String>>("CONTEXT_FILE_NAMES")
         .unwrap_or_else(|_| vec![
-            GOOSE_HINTS_FILENAME.to_string(),
+            CRYON_HINTS_FILENAME.to_string(),
             AGENTS_MD_FILENAME.to_string(),
         ])
 }
@@ -436,12 +436,12 @@ pub fn get_context_filenames() -> Vec<String> {
 
 ### Behavior
 
-1. **Working directory + upar ke parents** me `.goosehints` / `AGENTS.md` scan hota hai
+1. **Working directory + upar ke parents** me `.cryonhints` / `AGENTS.md` scan hota hai
 2. **Global** hints: `Paths::in_agents_home_dir("AGENTS.md")` (line 248) — matlab `~/.agents/AGENTS.md`
 3. Global hints ek heading ke saath alag block me jaate hain (line 295-297):
    ```
    ### Global Hints
-   These are my global goose hints.
+   These are my global cryon hints.
    ```
 4. **Gitignore respect karta hai** — `build_gitignore()` se ignore patterns banti hain
 5. **Subdirectory hints lazily load hote hain!** `SubdirectoryHintTracker` — jab agent kisi nayi directory me tool chalata hai, us dir ka hints file **us waqt** load ho ke `system_prompt_extras` me add hota hai (key = path).
@@ -469,7 +469,7 @@ Matlab hints **"# Additional Instructions:"** section me jaate hain — base pro
 
 ## 7. Layer 6 — Moim / `<turn-context>` block
 
-**File:** `crates/goose/src/agents/moim.rs`
+**File:** `crates/cryon/src/agents/moim.rs`
 
 "moim" = *mind of it's own memory*-type thing (persistent per-turn context injection). Ye `system.md` ke `moim_system_prompt_block` variable me jaata hai.
 
@@ -479,7 +479,7 @@ const MIN_CONTEXT_FOR_MOIM: usize = 32_000;
 const SYSTEM_PROMPT_BLOCK_TEMPLATE: &str = r#"# Turn Context
 
 Each turn may include a `<{turn_context_tag}>` block added to the request.
-This block is generated by goose and contains current operational context such as:
+This block is generated by cryon and contains current operational context such as:
 - current time
 - working directory
 - compaction status
@@ -494,11 +494,11 @@ make reasonable assumptions, and focus on finishing the user's task.
 "#;
 ```
 
-Keywords: `TURN_CONTEXT_TAG`, `CURRENT_TIME_TAG`, `WORKING_DIRECTORY_TAG` (`crates/goose/src/conversation/`)
+Keywords: `TURN_CONTEXT_TAG`, `CURRENT_TIME_TAG`, `WORKING_DIRECTORY_TAG` (`crates/cryon/src/conversation/`)
 
 ### Ye kis liye hai
 
-LLM ke paas "abhi kya time hai / kaha hoon / kitna budget bacha hai" ka inherent sense nahi hota. Goose ise **har turn** pe ek structured block ki tarah bhejta hai, aur system prompt me model ko **sikhaya jaata hai** ki is block ko user ke request ka hissa na samjhe.
+LLM ke paas "abhi kya time hai / kaha hoon / kitna budget bacha hai" ka inherent sense nahi hota. Cryon ise **har turn** pe ek structured block ki tarah bhejta hai, aur system prompt me model ko **sikhaya jaata hai** ki is block ko user ke request ka hissa na samjhe.
 
 **Sabse clever line:**
 > *"As the budget gets low, become more direct: reduce exploration, batch necessary tool calls, make reasonable assumptions, and focus on finishing the user's task."*
@@ -511,12 +511,12 @@ Ye ek **explicit graceful-degradation policy** hai. Turn budget khatam hone pe a
 
 ## 8. Layer 7 — Subagent System Prompt
 
-**Template:** `crates/goose/src/prompts/subagent_system.md` (34 lines)
-**Renderer:** `crates/goose/src/agents/subagent_handler.rs:263`
+**Template:** `crates/cryon/src/prompts/subagent_system.md` (34 lines)
+**Renderer:** `crates/cryon/src/agents/subagent_handler.rs:263`
 
 ```jinja
-You are a specialized subagent within the goose AI framework, created by AAIF
-(Agentic AI Foundation). You were spawned by the main goose agent to handle a
+You are a specialized subagent within the cryon AI framework, created by AAIF
+(Agentic AI Foundation). You were spawned by the main cryon agent to handle a
 specific task efficiently.
 
 # Your Role
@@ -606,9 +606,9 @@ When to call a subagent (one of [names]):
 
 ### 9a. Compaction — context khatam hone pe
 
-**File:** `crates/goose-context-management/src/prompts/compaction.md` (2.8 KB)
+**File:** `crates/cryon-context-management/src/prompts/compaction.md` (2.8 KB)
 
-Ye sabse under-rated prompt hai. Jab context limit hit hoti hai, goose **structured JSON summary** banata hai:
+Ye sabse under-rated prompt hai. Jab context limit hit hoti hai, cryon **structured JSON summary** banata hai:
 
 ```json
 {
@@ -635,9 +635,9 @@ Key instructions:
 Iske comment me likha hai:
 ```
 This template is user-overridable: place a modified copy at
-~/.config/goose/prompts/compaction_summary.md to experiment with what the
+~/.config/cryon/prompts/compaction_summary.md to experiment with what the
 post-compaction context contains (e.g. `user_intent[:3]` to keep only the
-three most important goals) without rebuilding goose.
+three most important goals) without rebuilding cryon.
 ```
 
 Aur `code_fence` custom filter escape-safe fencing karta hai.
@@ -683,7 +683,7 @@ Ye SmartApprove mode me chalta hai — decide karta hai konsa tool call read-onl
 Chhote local models ke liye **completely different paradigm** — inko tool-calling schema nahi diya jaata, shell emulation sikhaate hain:
 
 ```
-You are goose, an autonomous AI agent created by AAIF (Agentic AI Foundation). You act
+You are cryon, an autonomous AI agent created by AAIF (Agentic AI Foundation). You act
 on the user's behalf — you do not explain how to do things, you DO them directly.
 
 The OS is {{os}}, the shell is {{shell}}, and the working directory is {{working_directory}}
@@ -702,18 +702,18 @@ You: Let me check.
 $ ls -1 /tmp | wc -l
 ```
 
-(Copy bhi hai: `crates/goose-local-inference/src/prompts/tiny_model_system.md`)
+(Copy bhi hai: `crates/cryon-local-inference/src/prompts/tiny_model_system.md`)
 
 ### 9e. Apps generation
 
-- `prompts/apps_create.md` (19 lines) — naya Goose app (HTML/CSS/JS) generate karna
+- `prompts/apps_create.md` (19 lines) — naya Cryon app (HTML/CSS/JS) generate karna
 - `prompts/apps_iterate.md` (25 lines) — feedback pe existing app update karna
 
 Renderer: `platform_extensions/apps.rs:334` aur `:382`
 
-### 9f. CLI code review — `crates/goose-cli/src/commands/review/default_review_prompt.md`
+### 9f. CLI code review — `crates/cryon-cli/src/commands/review/default_review_prompt.md`
 
-~120 lines ka **most detailed prompt repo me**. `goose review` command ke liye.
+~120 lines ka **most detailed prompt repo me**. `cryon review` command ke liye.
 
 Structure:
 1. **Output contract** — har issue ek JSON line: `severity`, `path`, `line_start`, `line_end`, `summary`, `check`
@@ -736,7 +736,7 @@ Structure:
 ```ts
 export const MAX_STEPS = 35;
 
-"You are a helpful assistant in the goose Discord server.
+"You are a helpful assistant in the cryon Discord server.
 ...
 You can perform a maximum of ${MAX_STEPS} steps (tool calls, text outputs, etc.).
 If you exceed this limit, no response will be provided to the user. BEFORE you reach
@@ -746,31 +746,31 @@ the limit, STOP calling tools, respond to the user..."
 ## Codebase tools        → search_codebase, list_codebase_files, view_codebase
 ## GitHub tools          → search_github, get_github_issue_or_pr
 ```
-Plus: *"DO NOT capitalize \"goose\" or \"codename goose\""* aur link-preview suppression ke liye angle brackets.
+Plus: *"DO NOT capitalize \"cryon\" or \"codename cryon\""* aur link-preview suppression ke liye angle brackets.
 
 ### 9h. Live voice
 
-- `crates/goose/src/live_voice/service.rs:28` — `LIVE_SESSION_INSTRUCTIONS`
-- `crates/goose/src/live_voice/service.rs:46` — `DELEGATION_DELIVERY_FAILURE_INSTRUCTIONS`
-- `crates/goose/src/live_voice/interaction.rs:17` — `DELEGATION_INSTRUCTION`
-- `crates/goose/src/acp/server/live_voice.rs:9` — `LIVE_DELEGATION_INSTRUCTION`
+- `crates/cryon/src/live_voice/service.rs:28` — `LIVE_SESSION_INSTRUCTIONS`
+- `crates/cryon/src/live_voice/service.rs:46` — `DELEGATION_DELIVERY_FAILURE_INSTRUCTIONS`
+- `crates/cryon/src/live_voice/interaction.rs:17` — `DELEGATION_INSTRUCTION`
+- `crates/cryon/src/acp/server/live_voice.rs:9` — `LIVE_DELEGATION_INSTRUCTION`
 
 ---
 
 ## 10. Template Registry + Override System
 
-**File:** `crates/goose/src/prompt_template.rs:11-51`
+**File:** `crates/cryon/src/prompt_template.rs:11-51`
 
 Ye **sabse practical cheez** hai — user apne prompts replace kar sakta hai bina rebuild ke.
 
 ```rust
 static TEMPLATE_REGISTRY: &[(&str, &str)] = &[
-    ("system.md",             "Main system prompt that defines goose's personality and behavior"),
+    ("system.md",             "Main system prompt that defines cryon's personality and behavior"),
     ("compaction.md",         "Prompt for summarizing conversation history when context limits are reached"),
     ("compaction_summary.md", "Renders the structured compaction output into the post-compaction context"),
     ("subagent_system.md",    "System prompt for subagents spawned to handle specific tasks"),
-    ("apps_create.md",        "Prompt for generating new Goose apps based on the user instructions"),
-    ("apps_iterate.md",       "Prompt for updating existing Goose apps based on feedback"),
+    ("apps_create.md",        "Prompt for generating new Cryon apps based on the user instructions"),
+    ("apps_iterate.md",       "Prompt for updating existing Cryon apps based on feedback"),
     ("permission_judge.md",   "Prompt for analyzing tool operations for read-only detection"),
     ("tiny_model_system.md",  "System prompt for tiny local models using shell command emulation"),
     ("session_name.md",       "System prompt for generating short session names from conversation history"),
@@ -781,7 +781,7 @@ static TEMPLATE_REGISTRY: &[(&str, &str)] = &[
 
 ```rust
 // prompt_template.rs:112-127
-let user_path = user_prompts_dir().join(name);   // ~/.config/goose/prompts/<name>
+let user_path = user_prompts_dir().join(name);   // ~/.config/cryon/prompts/<name>
 let template_str = if user_path.exists() {
     std::fs::read_to_string(&user_path)?            // ← user ka version
 } else {
@@ -795,7 +795,7 @@ let template_str = if user_path.exists() {
 static CORE_PROMPTS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/prompts");
 ```
 
-Templates **binary me compile** hote hain (`include_dir!`) — runtime pe disk se nahi padhte. Fallback: `goose_context_management::templates::builtin_template(name)`.
+Templates **binary me compile** hote hain (`include_dir!`) — runtime pe disk se nahi padhte. Fallback: `cryon_context_management::templates::builtin_template(name)`.
 
 ### Engine: MiniJinja
 
@@ -808,9 +808,9 @@ env.add_filter("code_fence", code_fence);  // custom filter
 ### User override karne ka tarika
 
 ```bash
-mkdir -p ~/.config/goose/prompts
-cp <goose src>/crates/goose/src/prompts/system.md ~/.config/goose/prompts/
-# edit karo — goose restart karo, bas
+mkdir -p ~/.config/cryon/prompts
+cp <cryon src>/crates/cryon/src/prompts/system.md ~/.config/cryon/prompts/
+# edit karo — cryon restart karo, bas
 ```
 
 ### Desktop UI se
@@ -822,7 +822,7 @@ configPromptsSave_unstable / configPromptsReset_unstable
 ```
 UI component: `ui/desktop/src/components/settings/PromptsSettingsSection.tsx`
 
-Server side: `crates/goose/src/acp/server/prompts.rs`
+Server side: `crates/cryon/src/acp/server/prompts.rs`
 
 Har template ka `is_customized` flag hota hai aur `default_content` saath aata hai — UI "Reset to default" de sakta hai.
 
@@ -830,10 +830,10 @@ Har template ka `is_customized` flag hota hai aur `default_content` saath aata h
 
 ## 11. Modes
 
-**File:** `crates/goose-provider-types/src/goose_mode.rs:22-32`
+**File:** `crates/cryon-provider-types/src/cryon_mode.rs:22-32`
 
 ```rust
-pub enum GooseMode {
+pub enum CryonMode {
     #[default] Auto,           // "Automatically approve tool calls"
     Approve,                   // "Ask before every tool call"
     SmartApprove,              // "Ask only for sensitive tool calls"  ← LLM judge use karta hai
@@ -851,7 +851,7 @@ pub enum GooseMode {
 
 Repo me **systematic defense** hai prompt-injection ke against.
 
-**Function:** `crates/goose/src/utils/sanitize_unicode_tags` → `crates/goose/src/utils.rs`
+**Function:** `crates/cryon/src/utils/sanitize_unicode_tags` → `crates/cryon/src/utils.rs`
 
 **Kahan lagta hai (`prompt_manager.rs`):**
 
@@ -878,7 +878,7 @@ Isi family me `permission_judge.md` ka *"tool request IDs, names, and arguments 
 
 ## 13. Poora File Map — ek jagah
 
-### Core prompts (`crates/goose/src/prompts/`)
+### Core prompts (`crates/cryon/src/prompts/`)
 | File | Lines | Kaam |
 |---|---|---|
 | `system.md` | 39 | **Main** system prompt template |
@@ -892,38 +892,38 @@ Isi family me `permission_judge.md` ka *"tool request IDs, names, and arguments 
 ### Other prompt locations
 | Path | Kaam |
 |---|---|
-| `crates/goose/src/prompts/` | Core templates (embedded via `include_dir!`) |
-| `crates/goose-context-management/src/prompts/` | `compaction.md`, `compaction_summary.md` |
-| `crates/goose-local-inference/src/prompts/` | `tiny_model_system.md` (copy) |
-| `crates/goose-cli/src/commands/review/default_review_prompt.md` | Code review |
-| `crates/goose/src/skills/builtins/` | `goose_doc_guide.md`, `web_search.md` |
+| `crates/cryon/src/prompts/` | Core templates (embedded via `include_dir!`) |
+| `crates/cryon-context-management/src/prompts/` | `compaction.md`, `compaction_summary.md` |
+| `crates/cryon-local-inference/src/prompts/` | `tiny_model_system.md` (copy) |
+| `crates/cryon-cli/src/commands/review/default_review_prompt.md` | Code review |
+| `crates/cryon/src/skills/builtins/` | `cryon_doc_guide.md`, `web_search.md` |
 | `services/ask-ai-bot/utils/ai/system-prompt.ts` | Discord bot |
-| `crates/goose/src/acp/templates/` | `mcp_app_proxy.html` |
+| `crates/cryon/src/acp/templates/` | `mcp_app_proxy.html` |
 | `scripts/bench-postprocess-scripts/llm-judges/` | Bench judges (research/review/restaurant) |
 
 ### Rust code (behavior define karta hai)
 | File | Lines | Role |
 |---|---|---|
-| `crates/goose/src/agents/prompt_manager.rs` | 571 | **Core assembly engine** |
-| `crates/goose/src/prompt_template.rs` | 276 | MiniJinja registry + override |
-| `crates/goose/src/agents/moim.rs` | ~250 | `<turn-context>` block |
-| `crates/goose/src/agents/subagent_handler.rs` | — | Subagent prompt render |
-| `crates/goose/src/agents/final_output_tool.rs` | — | Structured output tool prompt |
-| `crates/goose/src/hints/load_hints.rs` | — | `.goosehints` / `AGENTS.md` loading |
-| `crates/goose/src/agents/state_machine/inference_preparation.rs` | — | Prompt → provider |
-| `crates/goose/src/permission/permission_judge.rs` | — | Safety classifier |
-| `crates/goose/src/agents/platform_extensions/developer/mod.rs` | 405 | **Developer instructions + tools** |
-| `crates/goose/src/agents/platform_extensions/developer/shell.rs` | 1408 | Shell execution |
-| `crates/goose/src/agents/platform_extensions/developer/edit.rs` | 512 | write/edit tools |
-| `crates/goose/src/agents/platform_extensions/summon.rs` | ~800+ | Subagent delegation |
-| `crates/goose/src/agents/platform_extensions/mod.rs` | ~310 | Extension registry + defaults |
-| `crates/goose/src/agents/platform_extensions/code_execution.rs` | — | Code Mode |
-| `crates/goose-provider-types/src/goose_mode.rs` | 33 | Auto/Approve/SmartApprove/Chat |
+| `crates/cryon/src/agents/prompt_manager.rs` | 571 | **Core assembly engine** |
+| `crates/cryon/src/prompt_template.rs` | 276 | MiniJinja registry + override |
+| `crates/cryon/src/agents/moim.rs` | ~250 | `<turn-context>` block |
+| `crates/cryon/src/agents/subagent_handler.rs` | — | Subagent prompt render |
+| `crates/cryon/src/agents/final_output_tool.rs` | — | Structured output tool prompt |
+| `crates/cryon/src/hints/load_hints.rs` | — | `.cryonhints` / `AGENTS.md` loading |
+| `crates/cryon/src/agents/state_machine/inference_preparation.rs` | — | Prompt → provider |
+| `crates/cryon/src/permission/permission_judge.rs` | — | Safety classifier |
+| `crates/cryon/src/agents/platform_extensions/developer/mod.rs` | 405 | **Developer instructions + tools** |
+| `crates/cryon/src/agents/platform_extensions/developer/shell.rs` | 1408 | Shell execution |
+| `crates/cryon/src/agents/platform_extensions/developer/edit.rs` | 512 | write/edit tools |
+| `crates/cryon/src/agents/platform_extensions/summon.rs` | ~800+ | Subagent delegation |
+| `crates/cryon/src/agents/platform_extensions/mod.rs` | ~310 | Extension registry + defaults |
+| `crates/cryon/src/agents/platform_extensions/code_execution.rs` | — | Code Mode |
+| `crates/cryon-provider-types/src/cryon_mode.rs` | 33 | Auto/Approve/SmartApprove/Chat |
 
 ### Tests / golden files
 | File | Kaam |
 |---|---|
-| `crates/goose/src/agents/snapshots/goose__agents__prompt_manager__tests__basic.snap` | Rendered prompt |
+| `crates/cryon/src/agents/snapshots/cryon__agents__prompt_manager__tests__basic.snap` | Rendered prompt |
 | `...__typical_setup.snap` | Extensions ke saath |
 | `...__one_extension.snap` | Ek extension |
 | `...__all_platform_extensions.snap` | **Saare platform extensions** — real rendered prompt ka full example |
@@ -937,13 +937,13 @@ Snapshots `insta` crate se manage hote hain — prompt change karo to ye diff di
 `all_platform_extensions.snap` se (actually test output):
 
 ```markdown
-You are a general-purpose AI agent called goose, created by AAIF (Agentic AI Foundation).
-goose is being developed as an open-source software project.
+You are a general-purpose AI agent called cryon, created by AAIF (Agentic AI Foundation).
+cryon is being developed as an open-source software project.
 
 # Turn Context
 
 Each turn may include a `<turn-context>` block added to the request.
-This block is generated by goose and contains current operational context such as:
+This block is generated by cryon and contains current operational context such as:
 - current time
 - working directory
 - compaction status
@@ -990,7 +990,7 @@ Use the developer extension to build software and operate a terminal.
 ## skills
 ### Instructions
 You have these skills at your disposal...
-• goose-doc-guide - ...
+• cryon-doc-guide - ...
 • web-search - ...
 
 ## todo
@@ -1004,7 +1004,7 @@ Use Markdown formatting for all responses.
 
 # Additional Instructions:
 
-<.goosehints / AGENTS.md content>
+<.cryonhints / AGENTS.md content>
 
 <recipe instructions, agar hai>
 
@@ -1021,7 +1021,7 @@ Right now you are in the chat only mode, no access to any tool use and system.
 2. **Prompt cache as a first-class concern** — hour-truncated timestamp, alphabetical extension sorting, sorted tool names.
 3. **Progressive disclosure** — subdirectory hints lazy load, subagents sirf naam+description se announce hote hain.
 4. **Sanitize at render time** — Unicode tags har entry point pe strip.
-5. **User-overridable templates** — `~/.config/goose/prompts/`, no rebuild, `is_customized` + reset support.
+5. **User-overridable templates** — `~/.config/cryon/prompts/`, no rebuild, `is_customized` + reset support.
 6. **Snapshot testing for prompts** — `insta` snapshots se prompt regressions catch hote hain.
 7. **Explicit cost/context awareness** in prompt text — model ko batao ki turns paise lagate hain.
 8. **Graceful degradation policy** — turn budget kam hone pe kya karna hai, likha hua hai.
@@ -1030,31 +1030,31 @@ Right now you are in the chat only mode, no access to any tool use and system.
 
 ```bash
 # 1. Prompt override karo
-mkdir -p ~/.config/goose/prompts
-cp crates/goose/src/prompts/system.md ~/.config/goose/prompts/
-$EDITOR ~/.config/goose/prompts/system.md
+mkdir -p ~/.config/cryon/prompts
+cp crates/cryon/src/prompts/system.md ~/.config/cryon/prompts/
+$EDITOR ~/.config/cryon/prompts/system.md
 
 # 2. Apne repo me hints daalo
-echo "Always run cargo fmt before committing." > .goosehints
+echo "Always run cargo fmt before committing." > .cryonhints
 
 # 3. Custom context files enable karo
-goose configure   # ya ~/.config/goose/config.yaml me:
-# CONTEXT_FILE_NAMES: [".goosehints", "AGENTS.md", "CLAUDE.md"]
+cryon configure   # ya ~/.config/cryon/config.yaml me:
+# CONTEXT_FILE_NAMES: [".cryonhints", "AGENTS.md", "CLAUDE.md"]
 
 # 4. Prompt snapshots dekho (prompt change karo aur diff dekho)
-cargo insta test --review -p goose
+cargo insta test --review -p cryon
 
 # 5. Debug: actual system prompt print karo
 #    state_machine/inference_preparation.rs:53 pe log ya breakpoint lagao
 ```
 
-### Agar aap goose jaisa agent bana rahe ho
+### Agar aap cryon jaisa agent bana rahe ho
 
-Minimum viable stack jo goose use karta hai:
+Minimum viable stack jo cryon use karta hai:
 1. **Ek chhota identity template** (~40 lines) — "you are X, do Y"
 2. **Extension instructions inject karo** system prompt ke andar, alphabetic order me
 3. **Tool descriptions ko seriously likho** — ye prompt ka highest-signal part hai
-4. **`.goosehints`-jaisa project context file** support karo, gitignore respect karke
+4. **`.cryonhints`-jaisa project context file** support karo, gitignore respect karke
 5. **Per-turn structured context block** (time, cwd, budget) — aur model ko sikhayo ki usse user request na samjhe
 6. **Context khatam hone pe structured JSON compaction** — verbatim quotes ke saath, paraphrase nahi
 7. **Prompt caching ke liye determinism** — sorted lists, hour-rounded timestamps
@@ -1062,4 +1062,4 @@ Minimum viable stack jo goose use karta hai:
 
 ---
 
-*Generated from commit `5850d4a` · goose v1.53.0 · Apache-2.0*
+*Generated from commit `5850d4a` · cryon v1.53.0 · Apache-2.0*

@@ -5016,7 +5016,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose"
+name = "cryon"
 version = "1.53.0"
 dependencies = [
  "agent-client-protocol",
@@ -5053,14 +5053,14 @@ dependencies = [
  "fs2",
  "futures",
  "gethostname",
- "goose-acp-macros",
- "goose-agent",
- "goose-context-management",
- "goose-download-manager",
- "goose-mcp",
- "goose-providers",
- "goose-sdk-types",
- "goose-test-support",
+ "cryon-acp-macros",
+ "cryon-agent",
+ "cryon-context-management",
+ "cryon-download-manager",
+ "cryon-mcp",
+ "cryon-providers",
+ "cryon-sdk-types",
+ "cryon-test-support",
  "http 1.5.0",
  "icu_calendar",
  "icu_locale",
@@ -5153,7 +5153,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-acp-macros"
+name = "cryon-acp-macros"
 version = "1.53.0"
 dependencies = [
  "quote",
@@ -5161,13 +5161,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-agent"
+name = "cryon-agent"
 version = "0.1.0-alpha.11"
 dependencies = [
  "anyhow",
  "async-trait",
  "futures",
- "goose-provider-types",
+ "cryon-provider-types",
  "js-sys",
  "rmcp 3.4.1",
  "schemars 1.2.2",
@@ -5183,7 +5183,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-cli"
+name = "cryon-cli"
 version = "1.53.0"
 dependencies = [
  "agent-client-protocol",
@@ -5208,10 +5208,10 @@ dependencies = [
  "etcetera",
  "fs2",
  "futures",
- "goose",
- "goose-mcp",
- "goose-providers",
- "goose-roaming",
+ "cryon",
+ "cryon-mcp",
+ "cryon-providers",
+ "cryon-roaming",
  "indicatif",
  "libc",
  "ntapi",
@@ -5247,12 +5247,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-context-management"
+name = "cryon-context-management"
 version = "0.1.0-alpha.11"
 dependencies = [
  "anyhow",
  "async-trait",
- "goose-provider-types",
+ "cryon-provider-types",
  "include_dir",
  "minijinja",
  "rmcp 3.4.1",
@@ -5263,7 +5263,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-download-manager"
+name = "cryon-download-manager"
 version = "0.1.0-alpha.11"
 dependencies = [
  "anyhow",
@@ -5275,7 +5275,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-local-inference"
+name = "cryon-local-inference"
 version = "0.1.0-alpha.11"
 dependencies = [
  "anyhow",
@@ -5287,9 +5287,9 @@ dependencies = [
  "env-lock",
  "etcetera",
  "futures",
- "goose-download-manager",
- "goose-provider-types",
- "goose-sdk-types",
+ "cryon-download-manager",
+ "cryon-provider-types",
+ "cryon-sdk-types",
  "hf-hub",
  "include_dir",
  "llama-cpp-2",
@@ -5309,7 +5309,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-mcp"
+name = "cryon-mcp"
 version = "1.53.0"
 dependencies = [
  "anyhow",
@@ -5337,7 +5337,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-provider-types"
+name = "cryon-provider-types"
 version = "0.1.0-alpha.11"
 dependencies = [
  "anyhow",
@@ -5369,7 +5369,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-providers"
+name = "cryon-providers"
 version = "0.1.0-alpha.11"
 dependencies = [
  "anyhow",
@@ -5380,8 +5380,8 @@ dependencies = [
  "env-lock",
  "flate2",
  "futures",
- "goose-local-inference",
- "goose-provider-types",
+ "cryon-local-inference",
+ "cryon-provider-types",
  "http 1.5.0",
  "include_dir",
  "pem 4.0.0",
@@ -5405,7 +5405,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-roaming"
+name = "cryon-roaming"
 version = "1.53.0"
 dependencies = [
  "anyhow",
@@ -5425,7 +5425,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-sdk"
+name = "cryon-sdk"
 version = "0.1.0-alpha.11"
 dependencies = [
  "agent-client-protocol",
@@ -5433,9 +5433,9 @@ dependencies = [
  "anyhow",
  "base64 0.23.1",
  "futures",
- "goose-context-management",
- "goose-providers",
- "goose-sdk-types",
+ "cryon-context-management",
+ "cryon-providers",
+ "cryon-sdk-types",
  "rmcp 3.4.1",
  "serde_json",
  "thiserror 2.0.20",
@@ -5445,7 +5445,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-sdk-types"
+name = "cryon-sdk-types"
 version = "0.1.0-alpha.11"
 dependencies = [
  "agent-client-protocol",
@@ -5456,7 +5456,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-test"
+name = "cryon-test"
 version = "1.53.0"
 dependencies = [
  "clap",
@@ -5464,7 +5464,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "goose-test-support"
+name = "cryon-test-support"
 version = "1.53.0"
 dependencies = [
  "axum",

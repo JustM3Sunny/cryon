@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { all_goose_modes, ModeSelectionItem } from './ModeSelectionItem';
+import { all_cryon_modes, ModeSelectionItem } from './ModeSelectionItem';
 import { useConfig } from '../../ConfigContext';
 
 export const ModeSection = () => {
@@ -8,24 +8,24 @@ export const ModeSection = () => {
 
   const handleModeChange = async (newMode: string) => {
     try {
-      await upsert('GOOSE_MODE', newMode, false);
+      await upsert('CRYON_MODE', newMode, false);
       setCurrentMode(newMode);
     } catch (error) {
-      console.error('Error updating goose mode:', error);
-      throw new Error(`Failed to store new goose mode: ${newMode}`, { cause: error });
+      console.error('Error updating cryon mode:', error);
+      throw new Error(`Failed to store new cryon mode: ${newMode}`, { cause: error });
     }
   };
 
   useEffect(() => {
-    const mode = config.GOOSE_MODE as string | undefined;
+    const mode = config.CRYON_MODE as string | undefined;
     if (mode) {
       setCurrentMode(mode);
     }
-  }, [config.GOOSE_MODE]);
+  }, [config.CRYON_MODE]);
 
   return (
     <div className="space-y-1">
-      {all_goose_modes.map((mode) => (
+      {all_cryon_modes.map((mode) => (
         <ModeSelectionItem
           key={mode.key}
           mode={mode}

@@ -1,8 +1,8 @@
 packages:
-  - 'goose-acp-client'
-  - 'goose-acp'
+  - 'cryon-acp-client'
+  - 'cryon-acp'
   - 'desktop'
-  - 'goose-binary/*'
+  - 'cryon-binary/*'
 
 registry: https://registry.npmjs.org/
 preferOffline: true

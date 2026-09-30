@@ -1,0 +1,52 @@
+{
+  "name": "@aaif/cryon-acp",
+  "version": "1.53.0",
+  "description": "Install and resolve the Cryon executable through npm",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JustM3Sunny/cryon.git"
+  },
+  "keywords": [
+    "cryon",
+    "ai",
+    "agent",
+    "acp",
+    "binary"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "cryon": "./bin/cryon.mjs"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "lint": "tsc --noEmit",
+    "format": "prettier --write src/ test/ bin/",
+    "prepack": "npm run build"
+  },
+  "optionalDependencies": {
+    "@aaif/cryon-binary-darwin-arm64": "workspace:*",
+    "@aaif/cryon-binary-darwin-x64": "workspace:*",
+    "@aaif/cryon-binary-linux-arm64": "workspace:*",
+    "@aaif/cryon-binary-linux-x64": "workspace:*",
+    "@aaif/cryon-binary-win32-x64": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
+  }
+}

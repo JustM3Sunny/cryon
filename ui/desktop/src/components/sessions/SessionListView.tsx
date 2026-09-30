@@ -43,7 +43,7 @@ import {
   acpRenameSession,
   type SessionListItem,
 } from '../../acp/sessions';
-import type { SessionExportFormat } from '@aaif/goose-acp-client';
+import type { SessionExportFormat } from '@aaif/cryon-acp-client';
 import { acpChatSessionActions } from '../../acp/chatSessionStore';
 import { cancelAcpPermissionRequestsForSession } from '../../acp/permissionRequests';
 import { cancelAcpElicitationRequestsForSession } from '../../acp/elicitationRequests';
@@ -70,7 +70,7 @@ const i18n = defineMessages({
   importSession: { id: 'sessions.import', defaultMessage: 'Import Session' },
   chatHistoryDesc: {
     id: 'sessions.chatHistoryDesc',
-    defaultMessage: 'View and search your past conversations with Goose. {shortcut} to search.',
+    defaultMessage: 'View and search your past conversations with Cryon. {shortcut} to search.',
   },
   searchPlaceholder: { id: 'sessions.searchPlaceholder', defaultMessage: 'Search history...' },
   errorLoading: { id: 'sessions.error.loading', defaultMessage: 'Error Loading Sessions' },

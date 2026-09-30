@@ -1,4 +1,4 @@
-import { zRecipeDto } from '@aaif/goose-acp-client';
+import { zRecipeDto } from '@aaif/cryon-acp-client';
 import { z } from 'zod';
 
 type JsonSchema = Record<string, unknown>;

@@ -21,8 +21,8 @@ describe('httpBaseFromAcpWebSocketUrl', () => {
   });
 
   it('preserves path prefixes before the ACP endpoint', () => {
-    expect(httpBaseFromAcpWebSocketUrl('wss://example.com/goose/acp?token=secret')).toBe(
-      'https://example.com/goose'
+    expect(httpBaseFromAcpWebSocketUrl('wss://example.com/cryon/acp?token=secret')).toBe(
+      'https://example.com/cryon'
     );
   });
 
@@ -70,7 +70,7 @@ describe('normalizeAcpHttpBaseUrl', () => {
   });
 
   it('normalizes prefixed HTTPS base URLs', () => {
-    expect(normalizeAcpHttpBaseUrl('https://example.com/goose/')).toBe('https://example.com/goose');
+    expect(normalizeAcpHttpBaseUrl('https://example.com/cryon/')).toBe('https://example.com/cryon');
   });
 
   it('rejects WebSocket URLs', () => {
@@ -98,15 +98,15 @@ describe('normalizeAcpHttpBaseUrl', () => {
 describe('HTTP endpoint URLs from ACP HTTP base URLs', () => {
   it('builds status URLs from root and prefixed bases', () => {
     expect(statusHttpUrlFromHttpBase('https://example.com/')).toBe('https://example.com/status');
-    expect(statusHttpUrlFromHttpBase('https://example.com/goose/')).toBe(
-      'https://example.com/goose/status'
+    expect(statusHttpUrlFromHttpBase('https://example.com/cryon/')).toBe(
+      'https://example.com/cryon/status'
     );
   });
 
   it('builds ACP URLs from root and prefixed bases', () => {
     expect(acpHttpUrlFromHttpBase('https://example.com/')).toBe('https://example.com/acp');
-    expect(acpHttpUrlFromHttpBase('https://example.com/goose/')).toBe(
-      'https://example.com/goose/acp'
+    expect(acpHttpUrlFromHttpBase('https://example.com/cryon/')).toBe(
+      'https://example.com/cryon/acp'
     );
   });
 });

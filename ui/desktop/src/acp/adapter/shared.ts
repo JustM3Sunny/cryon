@@ -10,7 +10,7 @@ export type AcpChatStateChange =
       type: 'sessionInfo';
       name?: string;
       activeRunId?: string | null;
-      gooseMode?: string;
+      cryonMode?: string;
     }
   | { type: 'localSteerConfirmed'; messageId: string }
   | { type: 'notification'; notification: NotificationEvent };
@@ -23,7 +23,7 @@ export interface AdapterState {
 
 export type ToolCallState = Omit<ToolCallUpdate, '_meta'>;
 
-export interface GooseMessageMeta {
+export interface CryonMessageMeta {
   messageId?: string;
   created?: number;
   outputTokenLimitReached?: boolean;
@@ -57,47 +57,47 @@ export function cloneMessage(message: Message): Message {
   };
 }
 
-export function getGooseMessageMeta(update: { _meta?: unknown }): GooseMessageMeta {
+export function getCryonMessageMeta(update: { _meta?: unknown }): CryonMessageMeta {
   if (!isRecord(update._meta)) {
     return {};
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose)) {
+  const cryon = update._meta.cryon;
+  if (!isRecord(cryon)) {
     return {};
   }
 
-  const outputTokenLimitReached = goose.outputTokenLimitReached === true;
+  const outputTokenLimitReached = cryon.outputTokenLimitReached === true;
 
   return {
-    created: typeof goose.created === 'number' ? goose.created : undefined,
-    messageId: typeof goose.messageId === 'string' ? goose.messageId : undefined,
+    created: typeof cryon.created === 'number' ? cryon.created : undefined,
+    messageId: typeof cryon.messageId === 'string' ? cryon.messageId : undefined,
     outputTokenLimitReached: outputTokenLimitReached ? true : undefined,
-    fallbackContent: goose.fallbackContent === true ? true : undefined,
-    steer: goose.steer === true ? true : undefined,
+    fallbackContent: cryon.fallbackContent === true ? true : undefined,
+    steer: cryon.steer === true ? true : undefined,
   };
 }
 
-export function getGooseActiveRunId(update: { _meta?: unknown }): string | null | undefined {
+export function getCryonActiveRunId(update: { _meta?: unknown }): string | null | undefined {
   if (!isRecord(update._meta)) {
     return undefined;
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !('activeRunId' in goose)) {
+  const cryon = update._meta.cryon;
+  if (!isRecord(cryon) || !('activeRunId' in cryon)) {
     return undefined;
   }
 
-  return typeof goose.activeRunId === 'string' || goose.activeRunId === null
-    ? goose.activeRunId
+  return typeof cryon.activeRunId === 'string' || cryon.activeRunId === null
+    ? cryon.activeRunId
     : undefined;
 }
 
-export function getGooseQueuedSteer(update: { _meta?: unknown }): string | undefined {
+export function getCryonQueuedSteer(update: { _meta?: unknown }): string | undefined {
   if (!isRecord(update._meta)) return undefined;
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !isRecord(goose.queuedSteer)) return undefined;
-  return typeof goose.queuedSteer.messageId === 'string' ? goose.queuedSteer.messageId : undefined;
+  const cryon = update._meta.cryon;
+  if (!isRecord(cryon) || !isRecord(cryon.queuedSteer)) return undefined;
+  return typeof cryon.queuedSteer.messageId === 'string' ? cryon.queuedSteer.messageId : undefined;
 }
 
 export function rawInputToArguments(rawInput: unknown): Record<string, unknown> {
@@ -109,15 +109,15 @@ export function toolIdentity(update: ToolCall | ToolCallUpdate): ToolIdentity {
     return {};
   }
 
-  const goose = update._meta.goose;
-  if (!isRecord(goose) || !isRecord(goose.toolCall)) {
+  const cryon = update._meta.cryon;
+  if (!isRecord(cryon) || !isRecord(cryon.toolCall)) {
     return {};
   }
 
   return {
-    toolName: typeof goose.toolCall.toolName === 'string' ? goose.toolCall.toolName : undefined,
+    toolName: typeof cryon.toolCall.toolName === 'string' ? cryon.toolCall.toolName : undefined,
     extensionName:
-      typeof goose.toolCall.extensionName === 'string' ? goose.toolCall.extensionName : undefined,
+      typeof cryon.toolCall.extensionName === 'string' ? cryon.toolCall.extensionName : undefined,
   };
 }
 

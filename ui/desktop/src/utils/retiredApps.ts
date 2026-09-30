@@ -1,6 +1,6 @@
-import type { GooseApp } from '../types/apps';
+import type { CryonApp } from '../types/apps';
 
-export function isRetiredGooseChatApp(app: GooseApp) {
+export function isRetiredCryonChatApp(app: CryonApp) {
   return (
     app.mcpServers?.includes('apps') &&
     app.uri === 'ui://apps/chat' &&

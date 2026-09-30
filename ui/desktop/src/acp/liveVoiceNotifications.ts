@@ -1,9 +1,9 @@
-import type { GooseSessionNotification_unstable } from '@aaif/goose-acp-client';
+import type { CryonSessionNotification_unstable } from '@aaif/cryon-acp-client';
 
 export type LiveVoiceInteractionEndedNotification = {
   sessionId: string;
   update: Extract<
-    GooseSessionNotification_unstable['update'],
+    CryonSessionNotification_unstable['update'],
     { sessionUpdate: 'live_voice_interaction_ended' }
   >;
 };

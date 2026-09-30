@@ -2,7 +2,7 @@
   "name": "custom_kilo",
   "engine": "openai",
   "display_name": "Kilo AI Gateway",
-  "description": "Kilo AI Gateway \u2014 OpenAI-compatible router, 397 models, 15 pinned at zero cost. Verified end-to-end with goose's streaming + tool-calling path: 14/15 respond reliably; thinkingmachines/inkling-small is subject to a hard daily request cap upstream. Model reliability varies with upstream load \u2014 if one 429s, switch model rather than retrying.",
+  "description": "Kilo AI Gateway \u2014 OpenAI-compatible router, 397 models, 15 pinned at zero cost. Verified end-to-end with cryon's streaming + tool-calling path: 14/15 respond reliably; thinkingmachines/inkling-small is subject to a hard daily request cap upstream. Model reliability varies with upstream load \u2014 if one 429s, switch model rather than retrying.",
   "api_key_env": "KILO_API_KEY",
   "base_url": "https://api.kilo.ai/api/gateway",
   "models": [
@@ -151,7 +151,7 @@
   "skip_canonical_filtering": true,
   "setup_steps": [
     "Create an API key at https://kilo.ai (GitHub login).",
-    "Store it as the goose secret KILO_API_KEY.",
+    "Store it as the cryon secret KILO_API_KEY.",
     "Free-tier models are zero-cost; paid models bill your Kilo account."
   ],
   "model_doc_link": "https://api.kilo.ai/api/gateway/models"

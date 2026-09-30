@@ -1,7 +1,7 @@
 import type {
-  GooseSessionNotification_unstable,
+  CryonSessionNotification_unstable,
   ProviderDeviceCodeNotification_unstable,
-} from '@aaif/goose-acp-client';
+} from '@aaif/cryon-acp-client';
 import type { SessionNotification } from '@agentclientprotocol/sdk';
 import { AppEvents } from '../constants/events';
 import { maybeHandlePlatformEvent } from '../utils/platform_events';
@@ -46,8 +46,8 @@ function maybeHandleLivePlatformEvent(notification: SessionNotification): void {
   }
 }
 
-export function handleAcpGooseSessionNotification(
-  notification: GooseSessionNotification_unstable
+export function handleAcpCryonSessionNotification(
+  notification: CryonSessionNotification_unstable
 ): Promise<void> {
   if (notification.update.sessionUpdate === 'live_voice_interaction_ended') {
     publishLiveVoiceInteractionEnded({
@@ -57,13 +57,13 @@ export function handleAcpGooseSessionNotification(
     return Promise.resolve();
   }
 
-  acpChatSessionActions.applyAcpGooseSessionNotification(notification);
+  acpChatSessionActions.applyAcpCryonSessionNotification(notification);
   return Promise.resolve();
 }
 
 export function handleAcpProviderDeviceCodeNotification(
   notification: ProviderDeviceCodeNotification_unstable
 ): Promise<void> {
-  window.dispatchEvent(new CustomEvent('goose:device-code', { detail: notification }));
+  window.dispatchEvent(new CustomEvent('cryon:device-code', { detail: notification }));
   return Promise.resolve();
 }

@@ -23,18 +23,18 @@ test-buzz:
 # Default release command
 release-binary:
     @echo "Building release version..."
-    cargo build --release -p goose-cli --bin goose
+    cargo build --release -p cryon-cli --bin cryon
     @just copy-binary
 
 # Build Windows executable on a Windows host
 [unix]
 release-windows:
-    @echo "just release-windows requires a Windows host because Goose Windows releases build the MSVC target. Use .github/workflows/bundle-windows.yml for CI builds."
+    @echo "just release-windows requires a Windows host because Cryon Windows releases build the MSVC target. Use .github/workflows/bundle-windows.yml for CI builds."
     @exit 1
 
 [windows]
 release-windows:
-    @powershell.exe -NoProfile -ExecutionPolicy Bypass -Command 'rustup target add x86_64-pc-windows-msvc; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; cargo build --release --target x86_64-pc-windows-msvc -p goose-cli --bin goose; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; Write-Host "Windows executable created at ./target/x86_64-pc-windows-msvc/release/goose.exe"'
+    @powershell.exe -NoProfile -ExecutionPolicy Bypass -Command 'rustup target add x86_64-pc-windows-msvc; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; cargo build --release --target x86_64-pc-windows-msvc -p cryon-cli --bin cryon; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; Write-Host "Windows executable created at ./target/x86_64-pc-windows-msvc/release/cryon.exe"'
 
 # Build for Intel Mac
 release-intel:
@@ -43,25 +43,25 @@ release-intel:
     @just copy-binary-intel
 
 copy-binary BUILD_MODE="release":
-    @rm -f ./ui/desktop/src/bin/goosed
-    @if [ -f ./target/{{BUILD_MODE}}/goose ]; then \
-        echo "Copying goose CLI binary from target/{{BUILD_MODE}}..."; \
-        rm -f ./ui/desktop/src/bin/goose; \
-        cp -p ./target/{{BUILD_MODE}}/goose ./ui/desktop/src/bin/; \
+    @rm -f ./ui/desktop/src/bin/cryond
+    @if [ -f ./target/{{BUILD_MODE}}/cryon ]; then \
+        echo "Copying cryon CLI binary from target/{{BUILD_MODE}}..."; \
+        rm -f ./ui/desktop/src/bin/cryon; \
+        cp -p ./target/{{BUILD_MODE}}/cryon ./ui/desktop/src/bin/; \
     else \
-        echo "goose CLI binary not found in target/{{BUILD_MODE}}"; \
+        echo "cryon CLI binary not found in target/{{BUILD_MODE}}"; \
         exit 1; \
     fi
 
 # Copy binary command for Intel build
 copy-binary-intel:
-    @rm -f ./ui/desktop/src/bin/goosed
-    @if [ -f ./target/x86_64-apple-darwin/release/goose ]; then \
-        echo "Copying Intel goose CLI binary to ui/desktop/src/bin..."; \
-        rm -f ./ui/desktop/src/bin/goose; \
-        cp -p ./target/x86_64-apple-darwin/release/goose ./ui/desktop/src/bin/; \
+    @rm -f ./ui/desktop/src/bin/cryond
+    @if [ -f ./target/x86_64-apple-darwin/release/cryon ]; then \
+        echo "Copying Intel cryon CLI binary to ui/desktop/src/bin..."; \
+        rm -f ./ui/desktop/src/bin/cryon; \
+        cp -p ./target/x86_64-apple-darwin/release/cryon ./ui/desktop/src/bin/; \
     else \
-        echo "Intel goose CLI binary not found."; \
+        echo "Intel cryon CLI binary not found."; \
         exit 1; \
     fi
 
@@ -73,11 +73,11 @@ copy-binary-windows:
 
 [windows]
 copy-binary-windows:
-    @powershell.exe -NoProfile -ExecutionPolicy Bypass -Command 'if (Test-Path ./target/x86_64-pc-windows-msvc/release/goose.exe) { \
+    @powershell.exe -NoProfile -ExecutionPolicy Bypass -Command 'if (Test-Path ./target/x86_64-pc-windows-msvc/release/cryon.exe) { \
         Write-Host "Copying Windows binary to ui/desktop/src/bin..."; \
         New-Item -ItemType Directory -Force "./ui/desktop/src/bin" | Out-Null; \
-        Remove-Item -Path "./ui/desktop/src/bin/goosed.exe" -Force -ErrorAction SilentlyContinue; \
-        Copy-Item -Path "./target/x86_64-pc-windows-msvc/release/goose.exe" -Destination "./ui/desktop/src/bin/" -Force; \
+        Remove-Item -Path "./ui/desktop/src/bin/cryond.exe" -Force -ErrorAction SilentlyContinue; \
+        Copy-Item -Path "./target/x86_64-pc-windows-msvc/release/cryon.exe" -Destination "./ui/desktop/src/bin/" -Force; \
     } else { \
         Write-Host "Windows binary not found." -ForegroundColor Red; \
         exit 1; \
@@ -93,20 +93,20 @@ run-ui-playwright:
     #!/usr/bin/env sh
     just release-binary
     echo "Running UI with Playwright debugging..."
-    RUN_DIR="$HOME/goose-runs/$(date +%Y%m%d-%H%M%S)"
+    RUN_DIR="$HOME/cryon-runs/$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$RUN_DIR"
     echo "Using isolated directory: $RUN_DIR"
-    cd ui/desktop && ENABLE_PLAYWRIGHT=true GOOSE_PATH_ROOT="$RUN_DIR" pnpm run start-gui
+    cd ui/desktop && ENABLE_PLAYWRIGHT=true CRYON_PATH_ROOT="$RUN_DIR" pnpm run start-gui
 
 run-ui-only:
     @echo "Running UI..."
     cd ui/desktop && pnpm install && pnpm run start-gui
 
 debug-ui:
-    @echo "🚀 Starting goose frontend in external ACP backend mode"
+    @echo "🚀 Starting cryon frontend in external ACP backend mode"
     cd ui/desktop && \
-    export GOOSE_EXTERNAL_BACKEND=true && \
-    export GOOSE_SERVER__SECRET_KEY="${GOOSE_SERVER__SECRET_KEY:-test}" && \
+    export CRYON_EXTERNAL_BACKEND=true && \
+    export CRYON_SERVER__SECRET_KEY="${CRYON_SERVER__SECRET_KEY:-test}" && \
     pnpm install && \
     pnpm run start-gui
 
@@ -118,7 +118,7 @@ debug-ui:
 # 4. If not auto-detected, click "Configure" and add: localhost:9229
 
 debug-ui-main-process:
-	@echo "🔍 Starting goose UI with main process debugging enabled"
+	@echo "🔍 Starting cryon UI with main process debugging enabled"
 	@just release-binary
 	cd ui/desktop && \
 	pnpm install && \
@@ -131,8 +131,8 @@ package-ui:
     @echo "Packaging desktop app..."
     cd ui/desktop && pnpm install && pnpm run package
     @echo "Signing with entitlements..."
-    codesign --force --deep --sign - --entitlements ui/desktop/entitlements.plist ui/desktop/out/Goose-darwin-arm64/Goose.app
-    @echo "Done! Launch with: open ui/desktop/out/Goose-darwin-arm64/Goose.app"
+    codesign --force --deep --sign - --entitlements ui/desktop/entitlements.plist ui/desktop/out/Cryon-darwin-arm64/Cryon.app
+    @echo "Done! Launch with: open ui/desktop/out/Cryon-darwin-arm64/Cryon.app"
 
 # Run UI with latest (Windows version)
 run-ui-windows:
@@ -149,14 +149,14 @@ run-docs:
 # Run server
 run-server:
     @echo "Running external ACP backend..."
-    GOOSE_SERVER__SECRET_KEY="${GOOSE_SERVER__SECRET_KEY:-test}" cargo run -p goose-cli --bin goose -- serve --platform desktop --enable-scheduler --host 127.0.0.1 --port 3000
+    CRYON_SERVER__SECRET_KEY="${CRYON_SERVER__SECRET_KEY:-test}" cargo run -p cryon-cli --bin cryon -- serve --platform desktop --enable-scheduler --host 127.0.0.1 --port 3000
 
 # Check if checked-in ACP artifacts are up-to-date and the docs can be rendered
 check-acp-artifacts: generate-acp-types generate-acp-docs
     #!/usr/bin/env bash
     set -e
     echo "🔍 Checking generated ACP artifacts are up-to-date..."
-    if ! git diff --exit-code crates/goose/acp-schema.json crates/goose/acp-meta.json ui/goose-acp-client/src/generated/; then
+    if ! git diff --exit-code crates/cryon/acp-schema.json crates/cryon/acp-meta.json ui/cryon-acp-client/src/generated/; then
       echo ""
       echo "❌ ACP generated files are out of date!"
       echo ""
@@ -167,7 +167,7 @@ check-acp-artifacts: generate-acp-types generate-acp-docs
 
 # Build the lean ACP binary
 build-lean:
-    cargo build -p goose --bin goose-acp \
+    cargo build -p cryon --bin cryon-acp \
       --profile lean \
       --no-default-features \
       --features native-tls,online-model-meta
@@ -178,7 +178,7 @@ build-lean:
 # A single cross-platform number would either be unreachable on Linux or
 # useless as a regression signal on macOS.
 
-# Enforce the lean binary's size budget (override with GOOSE_LEAN_MAX_BYTES)
+# Enforce the lean binary's size budget (override with CRYON_LEAN_MAX_BYTES)
 check-lean-size: build-lean
     #!/usr/bin/env bash
     set -euo pipefail
@@ -186,28 +186,28 @@ check-lean-size: build-lean
       Darwin) default_max_bytes=17825792 ;;
       *) default_max_bytes=23068672 ;;
     esac
-    max_bytes="${GOOSE_LEAN_MAX_BYTES:-$default_max_bytes}"
+    max_bytes="${CRYON_LEAN_MAX_BYTES:-$default_max_bytes}"
 
-    binary="target/lean/goose-acp"
+    binary="target/lean/cryon-acp"
     bytes=$(wc -c < "$binary" | tr -d '[:space:]')
     mib=$(awk -v bytes="$bytes" 'BEGIN { printf "%.2f", bytes / 1024 / 1024 }')
     printf '%s: %s bytes (%s MiB)\n' "$binary" "$bytes" "$mib"
 
     if (( bytes > max_bytes )); then
-      printf 'lean binary exceeds budget of %s bytes; set GOOSE_LEAN_MAX_BYTES to override\n' "$max_bytes" >&2
+      printf 'lean binary exceeds budget of %s bytes; set CRYON_LEAN_MAX_BYTES to override\n' "$max_bytes" >&2
       exit 1
     fi
 
 # Generate ACP JSON schema from Rust types
 generate-acp-schema:
     @echo "Generating ACP schema..."
-    cd crates/goose && cargo run --features code-mode,local-inference,aws-providers,telemetry,otel,rustls-tls,system-keyring --bin generate-acp-schema
-    @echo "ACP schema generated: crates/goose/acp-schema.json, crates/goose/acp-meta.json"
+    cd crates/cryon && cargo run --features code-mode,local-inference,aws-providers,telemetry,otel,rustls-tls,system-keyring --bin generate-acp-schema
+    @echo "ACP schema generated: crates/cryon/acp-schema.json, crates/cryon/acp-meta.json"
 
 # Generate ACP TypeScript types from JSON schema (requires generate-acp-schema first)
 generate-acp-types: generate-acp-schema
     @echo "Generating ACP TypeScript types..."
-    cd ui/goose-acp-client && npx tsx generate-schema.ts
+    cd ui/cryon-acp-client && npx tsx generate-schema.ts
     @echo "ACP TypeScript types generated for the ACP client package."
 
 # Generate ACP documentation from the existing JSON schema and metadata
@@ -219,13 +219,13 @@ generate-acp-docs:
 # Build ACP client TypeScript package (schema + types + compile)
 build-acp-client: generate-acp-types
     @echo "Compiling ACP TypeScript..."
-    cd ui/goose-acp-client && pnpm run build:ts
+    cd ui/cryon-acp-client && pnpm run build:ts
     @echo "ACP client package built."
 
 # Generate manpages for the CLI
 generate-manpages:
     @echo "Generating manpages..."
-    cargo run -p goose-cli --bin generate_manpages
+    cargo run -p cryon-cli --bin generate_manpages
     @echo "Manpages generated at target/man/"
 
 # make GUI with latest binary
@@ -240,7 +240,7 @@ make-ui:
 # make GUI with latest Windows binary on a Windows host
 [unix]
 make-ui-windows:
-    @echo "just make-ui-windows requires a Windows host because Goose Windows releases build the MSVC target. Use .github/workflows/bundle-windows.yml for CI builds."
+    @echo "just make-ui-windows requires a Windows host because Cryon Windows releases build the MSVC target. Use .github/workflows/bundle-windows.yml for CI builds."
     @exit 1
 
 [windows]
@@ -351,12 +351,12 @@ prepare-release version:
         Cargo.toml \
         Cargo.lock \
         ui/desktop/package.json \
-        ui/goose-acp-client/package.json \
-        ui/goose-acp/package.json \
-        ui/goose-binary/*/package.json \
+        ui/cryon-acp-client/package.json \
+        ui/cryon-acp/package.json \
+        ui/cryon-binary/*/package.json \
         ui/pnpm-lock.yaml \
-        crates/goose-provider-types/src/canonical/data/canonical_models.json \
-        crates/goose-provider-types/src/canonical/data/provider_metadata.json
+        crates/cryon-provider-types/src/canonical/data/canonical_models.json \
+        crates/cryon-provider-types/src/canonical/data/provider_metadata.json
     @git commit --message "chore(release): release version {{ version }}"
 
 # extract version from Cargo.toml
@@ -421,7 +421,7 @@ win-app-deps:
 win-copy-win profile:
   copy target{{s}}{{profile}}{{s}}*.exe ui{{s}}desktop{{s}}src{{s}}bin
   copy target{{s}}{{profile}}{{s}}*.dll ui{{s}}desktop{{s}}src{{s}}bin
-  if exist ui{{s}}desktop{{s}}src{{s}}bin{{s}}goosed.exe del /f /q ui{{s}}desktop{{s}}src{{s}}bin{{s}}goosed.exe
+  if exist ui{{s}}desktop{{s}}src{{s}}bin{{s}}cryond.exe del /f /q ui{{s}}desktop{{s}}src{{s}}bin{{s}}cryond.exe
 
 ### "Other" copy {release|debug} files to ui/desktop/src/bin
 ### s = os dependent file separator
@@ -466,7 +466,7 @@ win-total-rls *allparam:
 
 # Build the binaries the MCP conformance driver needs.
 mcp-conformance-build:
-  cargo build -p goose-cli --bin goose --bin mcp_conformance_driver
+  cargo build -p cryon-cli --bin cryon --bin mcp_conformance_driver
 
 # suite: all, core, extensions, backcompat, auth, metadata, draft, sep-835
 # build: "false" reuses the existing target/debug binaries instead of rebuilding
@@ -474,8 +474,8 @@ mcp-conformance-build:
 # Example: just mcp-conformance 2025-11-25 auth
 # Example: just mcp-conformance 2025-11-25 auth 0.2.0-alpha.10
 # Example: just mcp-conformance 2025-11-25 auth 0.2.0-alpha.10 false
-# Example: just mcp-conformance 2025-11-25 all 0.2.0-alpha.10 true crates/goose-cli/tests/mcp-conformance/expected-failures-2025-11-25-0.2.0-alpha.10.yaml
-[doc("Run an MCP client conformance suite against Goose.")]
+# Example: just mcp-conformance 2025-11-25 all 0.2.0-alpha.10 true crates/cryon-cli/tests/mcp-conformance/expected-failures-2025-11-25-0.2.0-alpha.10.yaml
+[doc("Run an MCP client conformance suite against Cryon.")]
 mcp-conformance version="2025-11-25" suite="all" conformance_version="0.2.0-alpha.10" build="true" baseline="":
   #!/usr/bin/env bash
   set -euo pipefail
@@ -489,11 +489,11 @@ mcp-conformance version="2025-11-25" suite="all" conformance_version="0.2.0-alph
   if [ -n "{{baseline}}" ]; then
     baseline_args=(--expected-failures "{{baseline}}")
   fi
-  GOOSE_DISABLE_KEYRING=1 npx -y @modelcontextprotocol/conformance@{{conformance_version}} client --command "target/debug/mcp_conformance_driver" --spec-version "{{version}}" --suite "{{suite}}" ${baseline_args[@]+"${baseline_args[@]}"}
+  CRYON_DISABLE_KEYRING=1 npx -y @modelcontextprotocol/conformance@{{conformance_version}} client --command "target/debug/mcp_conformance_driver" --spec-version "{{version}}" --suite "{{suite}}" ${baseline_args[@]+"${baseline_args[@]}"}
 
 build-test-tools:
-  cargo build -p goose-test
+  cargo build -p cryon-test
 
 record-mcp-tests: build-test-tools
-  GOOSE_RECORD_MCP=1 cargo test --package goose --test mcp_integration_test
-  git add crates/goose/tests/mcp_replays/
+  CRYON_RECORD_MCP=1 cargo test --package cryon --test mcp_integration_test
+  git add crates/cryon/tests/mcp_replays/
