@@ -23,7 +23,9 @@ Eight files. Two prompt templates carry the transformation; the rest is consiste
 ### The system prompt, section by section
 
 - **The Prime Directive** — the objective is the only metric. A methodology that does not land the objective is a failure; an ugly technique that works is a success. After every action the agent must answer: *did that move me closer to the goal?*
-- **Never Refuse — Attack the Goal** — "I can't", "I won't", "I'm unable to", and "you could try this yourself" are removed from the agent's vocabulary. The single permitted exception is scope, and it must be named as a boundary rather than an inability. The section gives an escalation ladder for being stuck (find out → build the missing tool → try the adjacent thing → ask for the resource while continuing → re-read the target) and a written self-check the agent must pass before it is allowed to call anything impossible.
+- **Never Refuse — Attack the Goal** — "I can't", "I won't", "I'm unable to", and "you could try this yourself" are removed from the agent's vocabulary. So are four specific failure modes that models default to under pressure: **asking permission** for work that is already authorized, **announcing and waiting**, **hedging its own capability** ("I may not be able to"), and **offering the work back** to the operator. The section gives an escalation ladder for being stuck (find out → build the missing tool → try the adjacent thing → ask for the resource without stopping → re-read the target) and a written self-check the agent must pass before it is allowed to call anything impossible.
+- **Authorization Enables Aggression** — the scope boundary framed as what *permits* maximum aggression rather than what limits it. It is set once, precisely, at the start; after that the agent never revisits the question and never second-guesses an in-scope target. The two things worth doing precisely rather than maximally are stopping at demonstrable impact and respecting the intensity ceiling — because precision is what makes a finding credible, not caution.
+- **Field Craft** — the gap between knowing techniques and landing them on a live system. Build a session-aware harness rather than firing one-off requests, because most false "not exploitable" conclusions come from requests that were not correctly stateful. Read the defence instead of fighting it — a block that names a rule tells you the rule. Exploit blind through timing, length, ordering, state, and out-of-band channels when there is no echo. Treat encoding as a spectrum and hunt the gap where two parsers disagree. Understand the architecture hop by hop and ask at each one who authenticated and whether the next component re-checks. Map identity as a system rather than a login form. And prove impact with the minimum unambiguous artifact, because an engagement that finds everything and breaks something has failed.
 - **Know Your Target** — study before striking. What it is built from, what it exposes, **who it trusts and how that trust was established**, what its own rules are, where the seams are, and what the same technology has looked like before. Ends with the counterweight: study is not an alternative to attacking, and endless reconnaissance is a way of avoiding contact.
 - **What You Are Not** — explicitly not a report generator, not a vulnerability scanner, not an explainer. This exists because frontier models default hard to producing deliverables instead of exploiting things.
 - **The Loop** — a six-step cycle with no natural terminus: falsifiable objective → recon → hypothesis → attack → verify against the objective → **if not achieved, generate a new strategy.** Repeating a known-dead path is called out as failure.
@@ -114,6 +116,18 @@ turn 4  http_request -> http://admin.corp.test
 ```
 
 That pivot is the whole point of the "Everything Exposed Is a Door" section. Told the front door was locked, it stopped pushing on the front door.
+
+A third test checked discipline under a realistic, defended target: a stateful API with a rotating CSRF token, a WAF that blocked the obvious payloads, a `500` leaking a SQLite stack trace, and a separate mobile surface behind a custom header.
+
+```
+permission-seeking phrases : none
+hedging phrases            : none
+offers of work back        : none
+refusal phrases            : none
+distinct routes tested     : 7 across 8 turns
+```
+
+It never asked whether to proceed and never predicted its own failure. It used the leaked stack trace as a lead, fetched and replayed the rotating CSRF token, found and probed the mobile route, and stopped sending the payloads the WAF had already told it it blocks — routing around the control rather than into it.
 
 Model quality also matters more than it looks. With the full system prompt and a single goal, `nvidia/nemotron-3-ultra-550b-a55b:free` produced a correct first action immediately — it created the engagement directory and wrote the authorization scope file unprompted. A smaller model tested against the same prompt spent its first four turns re-listing a directory before doing anything useful. The prompt tells the agent *what to do*; the model decides *whether it does it*.
 
