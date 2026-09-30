@@ -32,7 +32,6 @@ pub(crate) mod declarative_providers {
         lmstudio,
         lynkr,
         meta,
-        minimax,
         mistral,
         moonshot,
         nearai,

@@ -559,6 +559,38 @@ impl CliSession {
 
     /// Start an interactive session, optionally with an initial message
     pub async fn interactive(&mut self, prompt: Option<String>) -> Result<()> {
+        // The cryon banner: the mark drawn as a faceted crystal in the terminal,
+        // once per interactive session. Suppressed when stdout is not a terminal
+        // so piped and scripted runs stay clean, and when CRYON_NO_BANNER is set.
+        {
+            use std::io::IsTerminal;
+            if std::io::stdout().is_terminal() && std::env::var_os("CRYON_NO_BANNER").is_none() {
+                const ART: [&str; 7] = [
+                    "       /\\",
+                    "      /  \\",
+                    "     /    \\",
+                    "    /______\\",
+                    "     \\    /",
+                    "      \\  /",
+                    "       \\/",
+                ];
+                println!();
+                for (i, line) in ART.iter().enumerate() {
+                    let label = match i {
+                        1 => console::style("c r y o n").bold().to_string(),
+                        2 => console::style("autonomous offensive security").dim().to_string(),
+                        _ => String::new(),
+                    };
+                    println!(
+                        "{}  {}",
+                        console::style(format!("{:<13}", *line)).cyan(),
+                        label
+                    );
+                }
+                println!();
+            }
+        }
+
         let banners = self
             .agent
             .emit_hook_with_banners(cryon::hooks::HookEvent::SessionStart, &self.session_id)

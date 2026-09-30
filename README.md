@@ -1,3 +1,5 @@
+![cryon](assets/cryon-banner.svg)
+
 # cryon
 
 An autonomous offensive-security agent — a hard fork of [goose](https://github.com/aaif-goose/goose), the open-source AI agent by the [Agentic AI Foundation](https://aaif.io/). The entire project has been renamed from `goose` to `cryon`: crates, binaries, environment variables, config paths, the desktop UI, and the SDK namespaces.
@@ -129,6 +131,45 @@ distinct routes tested     : 7 across 8 turns
 It never asked whether to proceed and never predicted its own failure. It used the leaked stack trace as a lead, fetched and replayed the rotating CSRF token, found and probed the mobile route, and stopped sending the payloads the WAF had already told it it blocks — routing around the control rather than into it.
 
 Model quality also matters more than it looks. With the full system prompt and a single goal, `nvidia/nemotron-3-ultra-550b-a55b:free` produced a correct first action immediately — it created the engagement directory and wrote the authorization scope file unprompted. A smaller model tested against the same prompt spent its first four turns re-listing a directory before doing anything useful. The prompt tells the agent *what to do*; the model decides *whether it does it*.
+
+---
+
+## The mark
+
+Cryon is named for cold: **cryo**. The mark is a faceted ice crystal — six facets over a
+dimmed silhouette, so it stays legible as a 16px tray icon and still reads as a cut gem at
+2048px. A single cyan facet at the point keeps it from looking flat.
+
+It is drawn from one geometry, defined once, and rendered into every surface the project has:
+
+| Surface | Source | Rendered |
+|---|---|---|
+| Desktop UI | `ui/desktop/src/components/icons/Cryon.tsx` | React component, `currentColor`, themes automatically |
+| App icon | `ui/desktop/src/images/icon.svg` | PNG at 512/1024/2048, multi-size `.ico`, `.icns` |
+| Tray icon | `ui/desktop/src/images/glyph.svg` | 22px and 44px macOS template images (alpha only) |
+| Wordmark | `ui/desktop/src/components/settings/app/icons/cryon-lockup_{black,white}.png` | settings panel, light and dark |
+| Terminals | `crates/cryon-cli/src/session/mod.rs` | the banner below |
+| This page | `assets/cryon-banner.svg` | the hero above |
+
+### The CLI banner
+
+Opening an interactive session prints the mark, drawn in the terminal:
+
+```
+       /\
+      /  \        c r y o n
+     /    \       autonomous offensive security
+    /______\
+     \    /
+      \  /
+       \/
+```
+
+It is suppressed when stdout is not a terminal, so piped and scripted runs stay clean, and
+`CRYON_NO_BANNER=1` turns it off entirely.
+
+The upstream fork shipped Block's company lockup in the settings panel; that has been replaced
+with the cryon wordmark, and the goose artwork is gone from every logo, icon and splash.
 
 ---
 

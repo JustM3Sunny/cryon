@@ -1081,17 +1081,6 @@
     "model_count": 7
   },
   {
-    "id": "minimax",
-    "display_name": "MiniMax (minimax.io)",
-    "npm": "@ai-sdk/anthropic",
-    "api": "https://api.minimax.io/anthropic/v1",
-    "doc": "https://platform.minimax.io/docs/guides/quickstart",
-    "env": [
-      "MINIMAX_API_KEY"
-    ],
-    "model_count": 7
-  },
-  {
     "id": "minimax-cn",
     "display_name": "MiniMax (minimax.cn)",
     "npm": "@ai-sdk/anthropic",
