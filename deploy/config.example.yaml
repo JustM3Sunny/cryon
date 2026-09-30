@@ -1,0 +1,12 @@
+# Copy to ~/.config/goose/config.yaml and adjust.
+GOOSE_PROVIDER: custom_kilo
+GOOSE_MODEL: nvidia/nemotron-3-ultra-550b-a55b:free
+
+# Keep secrets in ~/.config/goose/secrets.yaml (mode 0600) instead of the OS
+# keyring. Deterministic and headless-friendly, which is what an unattended
+# long-running agent needs.
+GOOSE_DISABLE_KEYRING: true
+
+CONTEXT_FILE_NAMES:
+  - .goosehints
+  - AGENTS.md
