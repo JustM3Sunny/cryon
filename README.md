@@ -23,6 +23,8 @@ Eight files. Two prompt templates carry the transformation; the rest is consiste
 ### The system prompt, section by section
 
 - **The Prime Directive** — the objective is the only metric. A methodology that does not land the objective is a failure; an ugly technique that works is a success. After every action the agent must answer: *did that move me closer to the goal?*
+- **Never Refuse — Attack the Goal** — "I can't", "I won't", "I'm unable to", and "you could try this yourself" are removed from the agent's vocabulary. The single permitted exception is scope, and it must be named as a boundary rather than an inability. The section gives an escalation ladder for being stuck (find out → build the missing tool → try the adjacent thing → ask for the resource while continuing → re-read the target) and a written self-check the agent must pass before it is allowed to call anything impossible.
+- **Know Your Target** — study before striking. What it is built from, what it exposes, **who it trusts and how that trust was established**, what its own rules are, where the seams are, and what the same technology has looked like before. Ends with the counterweight: study is not an alternative to attacking, and endless reconnaissance is a way of avoiding contact.
 - **What You Are Not** — explicitly not a report generator, not a vulnerability scanner, not an explainer. This exists because frontier models default hard to producing deliverables instead of exploiting things.
 - **The Loop** — a six-step cycle with no natural terminus: falsifiable objective → recon → hypothesis → attack → verify against the objective → **if not achieved, generate a new strategy.** Repeating a known-dead path is called out as failure.
 - **Web Is Your Home Ground** — the largest section. Deep coverage of identity and auth (OAuth/OIDC/SAML/MFA/reset flows), session and token handling (JWT confusion, CSRF asymmetry, session fixation), access control (BOLA, function-level, tenant isolation, mass assignment), injection across every interpreter, client-side (XSS sinks, CSP abuse, prototype pollution, CORS+credentials), server-side (SSRF to cloud metadata, deserialization, request smuggling, cache poisoning), API surface (GraphQL batching, version drift, WebSocket post-handshake auth), **business logic and race conditions**, and exposed backends (Actuator, Docker socket, kubelet, CI/CD).
@@ -86,6 +88,18 @@ Two caveats worth knowing before you rely on it:
 2. **Some free routes have hard caps.** `thinkingmachines/inkling-small:free` returned a persistent `limit_rpd` 429 across retries — a daily request cap, not a transient blip.
 
 The practical consequence: **use model fallback.** Retrying the same model is the wrong response to a 429; switching to the next model in the chain is the right one. The pinned list in `deploy/custom_kilo.json` is ordered strongest-and-most-reliable first for exactly this purpose.
+
+### Does the refusal ban actually hold?
+
+Measured, not asserted. The agent was given a goal and a target state in which every single request returned `403` — deliberately engineered to invite giving up — and run for six turns.
+
+```
+refusal phrases across all turns    : none
+turns survived on a fully-blocked target : 6
+cost                                     : 0
+```
+
+It never wrote a sentence containing "I can't", "I'm unable to", "not possible", or "you could try". It kept re-approaching the surface — different objects, the auth endpoints, the root — rather than stopping. The prompt's job is to make surrender unavailable; the model's creativity at that point is its own.
 
 Model quality also matters more than it looks. With the full system prompt and a single goal, `nvidia/nemotron-3-ultra-550b-a55b:free` produced a correct first action immediately — it created the engagement directory and wrote the authorization scope file unprompted. A smaller model tested against the same prompt spent its first four turns re-listing a directory before doing anything useful. The prompt tells the agent *what to do*; the model decides *whether it does it*.
 
